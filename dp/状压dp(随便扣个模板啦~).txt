@@ -1,0 +1,62 @@
+#include<bits/stdc++.h>//unbengable//
+#define pr printf
+#define sc scanf
+#define endl '\n'
+#define ll long long 
+#define ull unsigned long long 
+#define rep(i,l,r) for(int i=l;i<=r;++i)
+#define per(i,r,l) for(int i=r;i>=l;--i)
+#define ms(x,y) memset(x,y,sizeof(x))
+#define local_in freopen("in.txt", "r", stdin)
+#define local_out freopen("out.txt", "w", stdout)
+#define IOS iostream::sync_with_stdio(false);cin.tie(0)
+#define debug(x) cout<<"#x:"<<" "<<x<<endl 
+const int inf = 0x3f3f3f3f, mod = 15, maxn = 15;
+const double eps = 1e-6;
+using namespace std;
+ 
+#define loop( i, a, b )	for( int i = a; i <= b; i++ )
+#define fill( a ) memset( a, inf, sizeof( a ) )
+#define idx( x ) 1 << ( x - 1 )
+ 
+ 
+ 
+int n, m;
+int edge[maxn][maxn];
+int dis[maxn];
+int dp[1<<maxn];
+ 
+void dfs( int s ) {
+	for( int i = 1; i <= n; i++ )
+		if( ( 1 << ( i - 1 ) ) & s )
+			for( int j = 1; j <= n; j++ )
+				if( !( ( 1 << ( j - 1 ) ) & s ) && edge[i][j] != inf )
+					if( dp[s | ( 1 << ( j - 1 ) )] > dp[s] + dis[i] * edge[i][j] ) {
+						int tmp = dis[j];
+						dis[j] = dis[i] + 1;
+						dp[s | ( 1 << ( j - 1 ) )] = dp[s] + dis[i] * edge[i][j];
+						dfs( s | ( 1 << ( j - 1 ) ) );
+						dis[j] = tmp;
+					}
+}
+ 
+int main() {
+	fill( edge );
+	scanf( "%d%d", &n, &m );
+	for( int i = 1; i <= m; i++ ) {
+		int u, v, c;
+		scanf( "%d%d%d", &u, &v, &c );
+		edge[u][v] = edge[v][u] = min( edge[v][u], c );
+	}
+	int ans = inf;
+	for( int i = 1; i <= n; i++ ) {
+		fill( dis );
+		fill( dp );
+		dis[i] = 1;
+		dp[idx( i )] = 0;
+		dfs( idx( i ) );
+		ans = min( ans, dp[( 1 << n ) - 1] );
+	}
+	printf( "%d", ans );
+	return 0;
+}

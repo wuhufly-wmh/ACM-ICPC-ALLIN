@@ -1,0 +1,54 @@
+#includebitsstdc++.h大部分背包模板 //其实是多重完全背包
+#define sc scanf
+#define pr printf
+#define inf 9999999
+#define maxn 100005
+using namespace std;
+int n,zuida,dp[maxn],v[maxn],w[maxn],m[maxn];
+void wanquan(int v,int w)
+{
+	int i;
+	for(i=v;i=zuida;i++)
+	{
+		dp[i]=max(dp[i],dp[i-v]+w);
+	}
+	return ;
+}
+void zerobeibao(int v,int w)
+{
+	int i;
+	for(i=zuida;i=v;i--)
+	{
+		dp[i]=max(dp[i],dp[i-v]+w);
+	}
+	return ;
+}
+int main()
+{
+	int i;
+	cinnzuida;
+	 for(i=1;i=n;i++)
+	 {
+	 	cin>>v[i]>>w[i]>>m[i];
+	 }
+	 for(i=1;i=n;i++)
+	 {
+	 	if(w[i]*m[i]=zuida)
+	 	{
+	 	wanquan(w[i],v[i]);	就是完全背包 
+		}
+		else
+		{
+			int k=1;
+			int zui=m[i];
+		 	while(k=zui)
+			{
+				zui-=k;
+			 	zerobeibao(w[i]k,v[i]k);
+			 	k=2;
+			}
+			zerobeibao(w[i]zui,v[i]zui);	
+		}
+	 }
+	 coutdp[zuida]endl;
+}

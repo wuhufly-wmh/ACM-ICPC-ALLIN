@@ -1,0 +1,109 @@
+ #include<bits/stdc++.h>//关键判断0或1，也就是这个叶子节点是否在当前dp状态上
+#define sc scanf
+#define pr printf
+#define ll long long 
+#define int long long 
+#define debug(x) cout<<"#x: "<<x<<endl
+using namespace std;
+const int maxn = 4e3 + 5,mod = 998244353;
+int tot=0;
+int head[maxn+5]={0};
+struct edge{
+	int to,next;
+}G[maxn<<2];
+int dir[maxn<<2]={0};//阶乘取模 
+int jie[maxn+5] = {0};//为阶乘取模的逆元 
+int dp[maxn][maxn][2] = {0};
+int g[maxn][maxn] = {0};
+void addd(int u,int v){
+	G[++tot] = (edge){v,head[u]};
+	head[u] = tot;
+	return ;
+}
+int sz[maxn+45]={0};
+void dfs(int u,int fa){
+	sz[u] = 1;
+	dp[u][0][0]=1;
+	for(int i = head[u]; ~i ;i = G[i].next){
+		int v = G[i].to;
+		if(v == fa)continue;
+		dfs(v,u);
+		for(int i=0;i<=(sz[u]+sz[v])/2;++i){
+			g[i][0] = 0;
+			g[i][1] = 0;
+ 		} 
+		for(int i=0;i<=sz[u]/2;++i){
+			for(int j=0;j<=sz[v]/2;++j){
+				(g[i+j][0] += dp[u][i][0]*(dp[v][j][0]+dp[v][j][1])%mod)%=mod; 
+				(g[i+j][1] += dp[u][i][1]*(dp[v][j][0]+dp[v][j][1])%mod)%=mod;
+				(g[i+j+1][1] += dp[u][i][0]*dp[v][j][0]%mod)%=mod;		
+			}
+		}
+		sz[u]+=sz[v];
+		//cout<<u<<endl;
+		for(int j=0;j<=(sz[u])/2;++j){
+			dp[u][j][0] = g[j][0];
+			dp[u][j][1] = g[j][1];
+		//cout<<j<<" "<<g[j][0]<<" "<<g[j][1]<<endl;
+		}
+	}
+	debug(u);
+	for(int j=0;j<=(sz[u])/2;++j){
+		cout<<j<<" "<<dp[u][j][0]<<" "<<dp[u][j][1]<<endl;
+		}
+	return ;
+}
+ll qpow(ll n,ll m){
+	ll ans=1;
+	while(m){
+		if(m&1){
+		ans*=n;
+		ans%=mod;
+		}
+		m>>=1;
+		n=n*n;
+		n%=mod;
+	}
+	return ans%=mod;
+}
+void init(){
+	dir[0] = 1;
+	for(int i = 1;i <= 4000 ; ++i ){
+		dir[i] = 1ll*dir[i-1]*i;
+		//cout<<dir[i]<<endl;
+		dir[i]%=mod;
+	}
+	for(int i=0;i<=4000;++i){
+		jie[i] = qpow(dir[i],mod-2);
+		//cout<<jie[i]<<endl;
+	}
+	return ;
+}
+ll C(ll n){
+	//return (dir[n]*((1ll*dir[2*n]*jie[n])%mod*jie[n])%mod)%mod*qpow(qpow(2,n),mod-2)%mod;
+	return dir[n]*dir[2*n]%mod*jie[n]%mod*jie[n]%mod*qpow(qpow(2,n),mod-2)%mod;
+}
+signed main(){
+	init();
+	memset(head,-1,sizeof(head));
+	int n;
+	sc("%lld",&n);
+	int u,v;
+	for(int i = 1;i <= 2 * n - 1;++i){
+		sc("%lld %lld",&u,&v);
+		addd(u,v);
+		addd(v,u); 
+	}
+	int ans = 0;
+	dfs(1,0);
+	for(int i=0;i<=n;++i){
+		int w = (dp[1][i][0]+dp[1][i][1])%mod;
+		w = w * C(n-i)%mod;
+		int flag = (i&1)?-1:1;
+		ans += w*flag;
+		ans = (ans+mod)%mod;
+	}
+	cout<<ans<<endl;
+	return 0;
+}
+//nchuacmicpc

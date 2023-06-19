@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>//区间dp模板 
+#define pr printf
+#define sc scanf
+#define maxn 205
+#define inf 39999999
+#define ll long long
+using namespace std;
+int main()
+{
+	int t;
+	ll dp[maxn][maxn];
+	int n,i,j,k;
+	ll a[maxn],b[maxn],len;
+	cin>>t;
+		int ans=0;
+		while(t--)
+		{
+			ans++;
+		cin>>n;
+		memset(dp,0,sizeof(dp));
+			for(i=1;i<=n;i++)
+			{
+				cin>>a[i];
+			}
+				for(i=1;i<=n;i++)
+				{
+					cin>>b[i];
+				}
+				for(len=1;len<=n;len++)
+				{
+					for(i=1;i<=n;i++)//区间起始点 
+					{
+						int j=i+len-1;
+						if(j>n)break;
+						dp[i][j]=inf;
+						for(k=i;k<=j;k++)
+						{
+						dp[i][j]=min(dp[i][j],b[i-1]+b[j+1]+a[k]+dp[i][k-1]+dp[k+1][j]);	
+						}
+					}
+				}
+			printf("Case #%lld: %d\n",ans,dp[1][n]);
+		}	
+} 

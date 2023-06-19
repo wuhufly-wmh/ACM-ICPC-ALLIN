@@ -1,0 +1,63 @@
+template <typename T, int r, int c>
+struct Matrix{
+  T mat[r][c] {};
+  template<typename T1, int cc>
+  Matrix<T1, r, cc> operator * (const Matrix<T1, c, cc>& m){
+    Matrix<common_type_t<T1, T>, r, cc> res{};
+    for(int i = 0; i < r; ++i)
+      for(int j = 0; j < cc; ++j){
+        for(int k = 0; k < c; ++k)
+          res.mat[i][j] = (res.mat[i][j] + mat[i][k] * m.mat[k][j] % P);
+        res.mat[i][j] %= P;
+      }
+    return res;
+  }
+  void init(T x) {
+    for(int i = 0; i < r; ++i) {
+      for(int j = 0; j < c; ++j) {
+        mat[i][j] = x;
+      }
+    }
+    return ;
+  }
+  Matrix<T, r, c> operator + (const Matrix& m) {
+    Matrix res{r, c};
+    res.init(0);
+    for(int i = 0; i < r; ++i)
+      for(int j = 0; j < c; ++j)
+        res.mat[i][j] = (mat[i][j] + m.mat[i][j]) % P;
+    return res;
+  }
+  void single() {
+    init(0);
+    for(int i = 0; i < r; i++) {
+      mat[i][i] = 1;
+    }
+  }
+  friend Matrix<T, r, r> qpow (const Matrix&m, ll k) {
+    Matrix<T, r, r> tmp, res;
+    tmp = m;
+    res.single();
+    for(;k ; k >>= 1, tmp = tmp * tmp) {
+      if(k & 1) {
+        res = res * tmp;
+      }
+    }
+    return res;
+  }
+  void read(){
+    for(int i = 0;i < r; i++) {
+      for(int j = 0; j < c; j++) {
+        cin >> mat[i][j];
+      }
+    }
+  }
+  void out() {
+    for(int i = 0 ; i < r; i++) {
+      for(int j = 0; j < c; j++) {
+        cout << mat[i][j] % P << (" \n"[j == c - 1]);
+      }
+    }
+  }
+};
+using M = Matrix<ll, 2, 2>;

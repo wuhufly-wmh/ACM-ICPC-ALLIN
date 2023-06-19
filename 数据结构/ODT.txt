@@ -1,0 +1,47 @@
+namespace ODT {
+  struct node {
+    int l, r;
+    mutable int val;
+    node (int lpos): l(lpos) {}
+    node (int lpos, int rpos, int vall): l(lpos), r(rpos), val(vall) {}
+    bool operator< (const node &a) const { return l < a.l; }
+  };
+
+  set<node> s;
+  using sit = set<node>::iterator;
+
+  inline void init(int l, int r){ s.insert(node(l, r, 1)); }
+
+  //^ChthollyTree-SetSplit
+  sit split(int pos) {
+    sit it = s.lower_bound(node(pos));
+    if(it != s.end() && it -> l == pos) return it;
+    --it;
+    int l = it -> l, r = it -> r, val = it -> val;
+    s.erase(it);
+    if(l <= pos - 1) s.insert(node(l, pos - 1, val));
+    if(r >= pos) return s.insert(node(pos, r, val)).first;
+    return s.end();
+  }
+
+  //^ChthollyTree-PartValueAssign
+  void assign(int l, int r, int val) {
+    sit itr = split(r + 1), itl = split(l);
+    s.erase(itl, itr);
+    s.insert(node(l, r, val));
+  }
+
+  //^ChthollyTree-PartValueAddition
+  void add(int l, int r, int val) {
+    sit itr = split(r + 1), itl = split(l);
+    //for(auto it = itl; it != itr; it++) it -> val += val;
+    while(itl != itr) itl -> val += val, itl++;
+  }
+
+  //^ChthollyTree-SinglePointQuery
+  int query(int pos) {
+    auto it = s.upper_bound(pos);
+    --it;
+    return it -> val;
+  }
+}//ChthollyTreeTemplate

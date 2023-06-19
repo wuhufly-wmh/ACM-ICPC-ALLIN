@@ -1,0 +1,23 @@
+#include<iostream>
+using namespace std;
+int n,k,a[25],vis[25],mod;
+long long jc[25]={1};
+int main(){
+	cin>>n>>k;
+	for(int i=1;i<n;i++) jc[i]=jc[i-1]*i;
+	mod=k-1;
+	for(int i=1;i<=n;i++){
+		k=mod/jc[n-i];
+		mod=mod%jc[n-i];
+		for(int j=1;j<=n;j++)
+			if(!vis[j]){
+				if(!k){
+					vis[j]=1;
+					cout<<j;
+					break;
+				}
+				k--;
+			}
+	}
+	return 0;
+}

@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+const int N = 10010, E = 200010;
+
+int n, m, s, t;
+LL first[N];
+LL to[E], nxt[E], val[E]/*残余容量*/;
+int cnt = 1;
+//cnt初值1，第一条边的标号为2（二进制10），第二条是3（二进制11） 
+//有啥好处呢？
+//我们加入一条边时，紧接着加入它的反向边（初始容量0） 
+//这两条边的标号就是二进制最后一位不相同，一个0、一个1
+//所以要召唤 p 这条边的反向边，只需用 p ^ 1
+//如果cnt初值为0，就做不到。当然初值-1也可以，略需改动
+
+//关于图中真正的反向边，可能引起顾虑，应该让它们标号相邻？ 
+//其实不用。该找到的增广路都会找到的 
+
+bool vis[N];//限制增广路不要重复走点，否则很容易爆栈 
+//兜一大圈走到汇点，还不如直接走到汇点
+
+void addE(int u, int v, LL w) {
+	++cnt;
+	to[cnt] = v;
+	val[cnt] = w;
+	nxt[cnt] = first[u];
+	first[u] = cnt;
+}
+LL dfs(int u, LL flow) {
+	//注意，在走到汇点之前，无法得知这次的流量到底有多少 
+	if (u == t)
+		return flow;//走到汇点才return一个实实在在的流量 
+	
+	vis[u] = true;
+	for (int p = first[u]; p; p = nxt[p]) {
+		int v = to[p];
+		if (val[p] == 0 or vis[v])//无残量，走了也没用 
+			continue;
+		int res = 0;
+		if ((res = dfs(v, min(flow, val[p]))) > 0) {
+			//↑顺着流过去，要受一路上最小容量的限制
+			val[p] -= res;//此边残余容量减小
+			val[p ^ 1] += res;//以后可以顺着反向边收回这些容量，前提是对方有人了 
+			return res;
+		}
+	}
+	return 0;//我与终点根本不连通（依照残量网络），上一个点不要信任我
+}
+int main() {
+	scanf("%d %d %d %d", &n, &m, &s, &t);
+	for (int i = 1; i <= m; ++i) {
+		int u, v; LL w;
+		scanf("%d %d %lld", &u, &v, &w);
+		addE(u, v, w);
+		addE(v, u, 0);//和正向边标号相邻
+		//反向边开始容量为0，表示不允许平白无故走反向边
+		//只有正向边流量过来以后，才提供返还流量的机会
+	}
+	LL res = 0, tot = 0;
+	while (memset(vis, 0, sizeof(vis)) and (res = dfs(s, 1e18/*水库无限*/)) > 0)
+		tot += res;//进行若干回合的增广
+
+	printf("%lld\n", tot);
+	return 0;
+}

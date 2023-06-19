@@ -1,0 +1,56 @@
+struct Scc {
+  int n;
+  vector<int> edge, invedge;
+  vector<int> ptr, zu, us;
+
+  int l;
+  vector<int> col;
+  int operator[](int u) const { return col[u]; }
+
+  explicit Scc(int n_) : n(n_), edge(), invedge(), l(-1) {}
+  void addedge(int u, int v) {
+    assert(0 <= u); assert(u < n);
+    assert(0 <= v); assert(v < n);
+    edge.push_back(u);
+    invedge.push_back(v);
+  }
+
+  void dfs0(int u) {
+    if (!col[u]) {
+      col[u] = -1;
+      for (int i = ptr[u]; i < ptr[u + 1]; ++i) dfs0(zu[i]);
+      us.push_back(u);
+    }
+  }
+  void dfs1(int u) {
+    if (!~col[u]) {
+      col[u] = l;
+      for (int i = ptr[u]; i < ptr[u + 1]; ++i) dfs1(zu[i]);
+    }
+  }
+  void run() {
+    const int m = edge.size();
+    ptr.resize(n + 2);
+    zu.resize(m);
+    for (int u = 0; u < n + 2; ++u) ptr[u] = 0;
+    for (int i = 0; i < m; ++i) ++ptr[edge[i] + 2];
+    for (int u = 2; u < n + 1; ++u) ptr[u + 1] += ptr[u];
+    for (int i = 0; i < m; ++i) zu[ptr[edge[i] + 1]++] = invedge[i];
+    col.assign(n, 0);
+    us.clear();
+    for (int u = 0; u < n; ++u) dfs0(u);
+    for (int u = 0; u < n + 2; ++u) ptr[u] = 0;
+    for (int i = 0; i < m; ++i) ++ptr[invedge[i] + 2];
+    for (int u = 2; u < n + 1; ++u) ptr[u + 1] += ptr[u];
+    for (int i = 0; i < m; ++i) zu[ptr[invedge[i] + 1]++] = edge[i];
+    l = 0;
+    for (int j = n; --j >= 0; ) if (!~col[us[j]]) { dfs1(us[j]); ++l; }
+  }
+
+  vector<vector<int>> group() const {
+    assert(~l);
+    vector<vector<int>> uss(l);
+    for (int u = 0; u < n; ++u) uss[col[u]].push_back(u);
+    return uss;
+  }
+};

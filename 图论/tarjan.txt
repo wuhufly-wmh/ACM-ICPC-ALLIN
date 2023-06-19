@@ -1,0 +1,73 @@
+struct Scc {
+  int n;
+  vector<int> edge, invedge;
+  vector<int> ptr, zu, us;
+	vector<int> in;
+  int cnt;
+  vector<int> col;
+  int operator[](int u) const { return col[u]; }
+
+  explicit Scc(int n_) : n(n_), edge(), invedge(), cnt(-1) {}
+  void addedge(int u, int v) {
+//  	cout << u << " " << v << "\n";
+    assert(0 <= u); assert(u < n);
+    assert(0 <= v); assert(v < n);
+    edge.push_back(u);
+    invedge.push_back(v);
+  }
+
+  void dfs0(int u) {
+    if (!col[u]) {
+      col[u] = -1;
+      for (int i = ptr[u]; i < ptr[u + 1]; ++i) dfs0(zu[i]);
+      us.push_back(u);
+    }
+  }
+  void dfs1(int u) {
+    if (!~col[u]) {
+      col[u] = cnt;
+      for (int i = ptr[u]; i < ptr[u + 1]; ++i) dfs1(zu[i]);
+    }
+  }
+  void run() {
+    const int m = edge.size();
+    ptr.resize(n + 2);
+    zu.resize(m);
+    for (int u = 0; u < n + 2; ++u) ptr[u] = 0;
+    for (int i = 0; i < m; ++i) ++ptr[edge[i] + 2];
+    for (int u = 2; u < n + 1; ++u) ptr[u + 1] += ptr[u];
+    for (int i = 0; i < m; ++i) zu[ptr[edge[i] + 1]++] = invedge[i];
+    col.assign(n, 0);
+    us.clear();
+    for (int u = 0; u < n; ++u) dfs0(u);
+    for (int u = 0; u < n + 2; ++u) ptr[u] = 0;
+    for (int i = 0; i < m; ++i) ++ptr[invedge[i] + 2];
+    for (int u = 2; u < n + 1; ++u) ptr[u + 1] += ptr[u];
+    for (int i = 0; i < m; ++i) zu[ptr[invedge[i] + 1]++] = edge[i];
+    cnt = 0;
+    for (int j = n; --j >= 0; ) if (!~col[us[j]]) { dfs1(us[j]); ++cnt; }
+  }
+
+  vector<vector<int>> group() const {
+    assert(~cnt);
+    vector<vector<int>> uss(cnt);
+    for (int u = 0; u < n; ++u) uss[col[u]].push_back(u);
+    return uss;
+  }
+  vector<vector<int>> getedge() {
+  	int sz = edge.size();
+  	vector<int>tmp(cnt, 0);
+  	in = tmp;
+  	vector<vector<int> > G(cnt);
+  	map<pair<int, int>, int>mp;
+		for (int i = 0; i < sz; i += 1) {
+			int u = edge[i], v = invedge[i];
+			if(col[u] != col[v] && mp.find({col[u], col[v]}) == mp.end()) {
+				G[col[u]].push_back(col[v]);
+				in[col[v]] += 1;
+				mp[{col[u], col[v]}] = 1;
+			}
+		}
+		return G;
+	}
+};

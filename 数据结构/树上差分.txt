@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+#define setIO(s) freopen(s".in","r",stdin) 
+#define maxn 300001 
+using namespace std;
+int hd[maxn], to[maxn<<1], nex[maxn<<1], fa[maxn], siz[maxn], top[maxn], hson[maxn],len[maxn],arr[maxn],buck[maxn];     
+int edges; 
+int ans[maxn]; 
+void add(int u,int v)
+{
+    nex[++edges]=hd[u], hd[u]=edges, to[edges]=v; 
+}
+void dfs1(int u,int ff)
+{
+    fa[u] = ff, siz[u] = 1, len[u] = len[ff] + 1; 
+    for(int i=hd[u];i;i=nex[i])
+    {
+        int v=to[i];
+        if(v==ff) continue; 
+        dfs1(v,u); 
+        siz[u] += siz[v]; 
+        if(siz[v] > siz[hson[u]]) hson[u] = v; 
+    }
+}
+void dfs2(int u,int tp)
+{
+    top[u]=tp;
+    if(hson[u]) dfs2(hson[u], tp); 
+    for(int i=hd[u];i;i=nex[i])
+    {
+        int v=to[i];
+        if(v==fa[u] || v==hson[u]) continue; 
+        dfs2(v, v); 
+    }
+}
+int lca(int a,int b)
+{
+    while(top[a] ^ top[b]) len[top[a]] < len[top[b]] ? b = fa[top[b]] : a = fa[top[a]];       
+    return len[a] > len[b] ? b : a; 
+}
+void dfs(int u) 
+{
+    for(int i=hd[u];i;i=nex[i])
+    {
+        int v=to[i];
+        if(v==fa[u]) continue; 
+        dfs(v); 
+        buck[u]+=buck[v];        
+    }
+}
+int main()
+{
+    // setIO("input"); 
+    int n; 
+    scanf("%d",&n); 
+    for(int i=1;i<=n;++i) scanf("%d",&arr[i]); 
+    for(int i=1;i<n;++i)
+    {
+        int u,v; 
+        scanf("%d%d",&u,&v); 
+        add(u,v), add(v,u); 
+    }
+    dfs1(1,0); 
+    dfs2(1,1); 
+    for(int i=2;i<=n;++i)
+    {
+        int c = lca(arr[i], arr[i-1]); 
+        ++buck[arr[i]];
+        ++buck[arr[i-1]]; 
+        --buck[c];
+        --buck[fa[c]]; 
+    }
+    dfs(1); 
+    for(int i=2;i<=n;++i) --buck[arr[i]]; 
+    for(int i=1;i<=n;++i)
+    {
+        printf("%d\n",buck[i]); 
+    }
+    return 0; 
+}

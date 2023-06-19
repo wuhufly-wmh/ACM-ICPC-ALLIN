@@ -1,0 +1,51 @@
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<cmath>
+#include<algorithm>
+#include<cstdlib>
+#define ll long long
+#define max(a,b) a>b?a:b
+#define min(a,b) a<b?a:b
+using namespace std;
+const int N=3e6,p=998244353,g=3,gi=332748118;
+int n,m,L,R[N];
+ll inv,wn[20],A[N],B[N];
+inline ll ksm(ll a,ll n){
+    ll ans=1;
+    while(n){
+        if(n&1)ans=ans*a%p;
+        a=a*a%p;
+        n>>=1;
+    }
+    return ans;
+}
+inline void NTT(ll *a,int f){
+    for(int i=0;i<n;++i)if(i<R[i])swap(a[i],a[R[i]]);
+    for(int i=1;i<n;i<<=1){
+        ll wn=ksm((f==1)?g:gi,(p-1)/(i<<1));
+        for(int j=0;j<n;j+=(i<<1)){
+            ll w=1;
+            for(int k=0;k<i;++k,w=w*wn%p){
+                ll x=a[j+k],y=w*a[j+k+i]%p;
+                a[j+k]=(x+y)%p;a[j+k+i]=(x-y+p)%p;
+            }
+        }
+    }
+    if(!~f)for(int i=0;i<n;++i)a[i]=a[i]*inv%p;
+}
+int main(){
+    for(int i=0;i<20;++i)wn[i]=ksm(g,(p-1)/(1<<i));
+    scanf("%d %d",&n,&m);
+    for(int i=0;i<=n;++i)A[i]=read(),A[i]=(A[i]+p)%p;
+    for(int i=0;i<=m;++i)B[i]=read(),B[i]=(B[i]+p)%p;
+    m+=n;
+    for(n=1;n<=m;n<<=1)++L;
+    inv=ksm(n,p-2);
+    for(int i=0;i<n;++i)R[i]=(R[i>>1]>>1)|((i&1)<<(L-1));
+    NTT(A,1);NTT(B,1);
+    for(int i=0;i<n;++i)A[i]=A[i]*B[i]%p;
+    NTT(A,-1);
+    for(int i=0;i<=m;++i)printf("%d ",A[i]);
+    return 0;
+}

@@ -1,0 +1,83 @@
+using ll = long long;
+const int N = 1e6 + 5, inf = 0x3f3f3f3f;
+
+struct segtree {
+  struct node {
+    ll sum = 0, add = 0;
+    void upd(int l, int r, ll v) {
+      sum += v * (r - l + 1);
+      add += v;
+    } 
+  };
+  node merge(const node &x, const node &y) {
+    node ret;
+    ret.sum = x.sum + y.sum;
+    return ret;
+  }
+  void pushdown(int l, int r, int rt) {
+    int mid = (l + r) >> 1;
+    if(a[rt].add != 0) {
+      a[rt << 1].upd(l, mid, a[rt].add);
+      a[rt << 1 | 1].upd(mid+1, r, a[rt].add);
+      a[rt].add = 0;
+    }
+  }
+  void build(int l, int r, int rt) {
+    if(l == r) {
+      return;
+    }
+    int mid = (l + r) >> 1;
+    build(l, mid, rt << 1);
+    build(mid + 1, r, rt << 1 | 1);
+    a[rt] = merge(a[rt << 1], a[rt << 1 | 1]);
+  }
+  template <typename T>
+  void build(int l, int r, int rt, const vector<T> &v) {
+    if(l == r) {
+      a[rt].sum = v[l];
+      return;
+    }
+    int mid = (l + r) >> 1;
+    build(l, mid, rt << 1, v);
+    build(mid + 1, r, rt << 1 | 1, v);
+    a[rt] = merge(a[rt << 1], a[rt << 1 | 1]);
+  }
+  segtree(int n):n(n), a(n << 2) {
+    build(0, n - 1, 1);
+  }
+  template <typename T>
+  segtree(const vector<T> &v):n(v.size()), a(v.size() << 2) {
+    build(0, n - 1, 1, v);
+  }
+
+  int n;
+  vector<node> a;
+  template <typename... V>
+  void update(int L, int R, int l, int r, int rt, const V&... v) {
+    if(L <= l && r <= R) {
+      a[rt].upd(l, r, v...);
+      return;
+    }
+    pushdown(l, r, rt);
+    int mid = (l + r) / 2;
+    if(L <= mid) update(L, R, l, mid, rt << 1, v...);
+    if(mid < R) update(L, R, mid+1, r, rt << 1 | 1, v...);
+    a[rt] = merge(a[rt << 1], a[rt << 1 | 1]);
+  }
+  template <typename... V>
+  void update(int L, int R, const V&... v) {
+    update(L, R, 0, n - 1, 1, v...);
+  }
+  node query(int L, int R, int l, int r, int rt) {
+    if(L <= l && r <= R) return a[rt];
+    node ret;
+    pushdown(l, r, rt);
+    int mid = (l + r) / 2;
+    if(L <= mid) ret = merge(ret, query(L, R, l, mid, rt << 1));
+    if(mid < R) ret = merge(ret, query(L, R, mid + 1, r, rt << 1 | 1));
+    return ret;
+  }
+  node query(int L, int R) {
+    return query(L, R, 0, n - 1, 1);
+  }
+};

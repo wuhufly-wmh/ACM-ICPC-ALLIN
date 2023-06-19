@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+#define debug(x) cout << #x << ": " << x << endl
+using namespace  std;
+
+using ll = long long;
+constexpr int N = 1e5 + 5, inf = 0x3f3f3f3f;
+
+int A[N] = {0}, sz[N] = {0}, rk[N] = {0}, son[N] = {0};
+int l[N] = {0}, r[N] = {0};
+int dp[(1 << 20)][20][2] = {0};
+int pw[22] = {0};
+int cnt = 0;
+vector<int>G[N];
+void solve() {
+  int n, u, v;
+  cin >> n;
+  for(int i = 1; i <= n; ++i) cin >> A[i];
+  auto dfs = [&](auto dfs, int u, int fa) -> void {
+    int MAX = -1;
+    sz[u] = 1, rk[++cnt] = u, l[u] = cnt;
+    son[u] = 0;
+    for(auto v : G[u]) {
+      if(v == fa) continue;
+      dfs(dfs, v, u);
+      if(MAX < sz[v]) MAX = sz[v], son[u] = v;
+      sz[u] += sz[v];
+    }
+    r[u] = cnt;
+    return ;
+  };
+  ll ans = 0;
+  auto update = [&](int x, int y, int c) {
+    for(int i = 19; i >= 0; --i) dp[x][i][(y >> i) & 1] += c;
+    return ;
+  };
+  auto dfs1 = [&](auto dfs1, int u, int fa) -> void {
+    for(auto v : G[u]) {
+      if(v == fa || v == son[u]) continue;
+      dfs1(dfs1, v, u);
+      for(int i = l[v]; i <= r[v]; ++i) update(A[rk[i]], rk[i], -1);
+    }
+    if(son[u]) dfs1(dfs1, son[u], u);
+    for(auto v : G[u]) {
+      if(v == fa || v == son[u]) continue;
+      for(int i = l[v]; i <= r[v]; ++i) {
+        int run = (A[u] ^ A[rk[i]]);
+        for(int j = 19; j >= 0; --j) {
+          ans += 1ll * dp[run][j][(((rk[i] >> j) & 1) ^ 1)] * (1 << j);
+        }
+      }
+      for(int i = l[v]; i <= r[v]; ++i) update(A[rk[i]], rk[i], 1);
+    }
+    update(A[u], u, 1);
+  };
+  for(int i = 1; i <= n - 1; ++i) {
+    cin >> u >> v;
+    G[u].emplace_back(v), G[v].emplace_back(u);
+  }
+  dfs(dfs, 1, 0); 
+  dfs1(dfs1, 1, 0);
+  cout << ans << "\n";
+  return ;
+}
+signed main () {
+  cin.tie(nullptr) -> sync_with_stdio(false);
+  cout.tie(nullptr);
+  int _ = 1;
+  while(_--) {
+    solve();
+  }
+  return 0;
+}

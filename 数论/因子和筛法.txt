@@ -1,0 +1,25 @@
+int prime[maxn],f[maxn],v[maxn],cnt;
+bool vis[maxn];
+int ans[maxn];
+void Euler(){
+    ans[1]=1;
+    for(LL i=2;i<=r;i++){
+        if(!vis[i]){
+            prime[++cnt]=i;
+            f[i]=v[i]=i+1;
+            vis[i]=1;
+        }
+        for(LL j=1;j<=cnt&&prime[j]<=r/i;j++){
+            vis[i*prime[j]]=1;
+            if(i%prime[j]==0){
+                v[i*prime[j]]=v[i]*prime[j]+1;
+                f[i*prime[j]]=f[i]/v[i]*v[i*prime[j]];
+                break;
+            }
+            else{
+                v[i*prime[j]]=prime[j]+1;
+                f[i*prime[j]]=f[i]*f[prime[j]];
+            }
+        }
+    }
+}

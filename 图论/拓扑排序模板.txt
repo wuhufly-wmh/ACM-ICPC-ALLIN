@@ -1,0 +1,42 @@
+ //b[]为每个点的入度
+for(i=1;i<=n;i++){
+   for(j=1;j<=n;j++){
+      if(b[j]==0){   //找到一个入度为0的点
+        ans=j;
+        vis[cnt++]=j;
+        b[j]--;
+        break;
+       }
+    }
+    for(j=1;j<=n;j++)
+        if(a[ans][j]) b[j]--; //与入度为0的点相连的点的入度减一
+}
+    printf("%d",vis[0]);
+    for(i=1;i<cnt;i++) printf(" %d",vis[i]);
+    printf("\n");//n*m复杂度拓扑排序
+
+//n+m复杂度拓扑排序
+    queue<int>q;
+    vector<int>edge[n];
+    for(int i=0;i<n;i++)  //n  节点的总数
+        if(in[i]==0) q.push(i);  //将入度为0的点入队列
+    vector<int>ans;   //ans 为拓扑序列
+    while(!q.empty())
+    {
+        int p=q.front(); q.pop(); // 选一个入度为0的点，出队列
+        ans.push_back(p);
+        for(int i=0;i<edge[p].size();i++)
+        {
+            int y=edge[p][i];
+            in[y]--;
+            if(in[y]==0)
+                q.push(y);  
+        }
+    }
+    if(ans.size()==n)   
+    {
+        for(int i=0;i<ans.size();i++)
+            printf( "%d ",ans[i] );
+        printf("\n");
+    }
+    else printf("No Answer!\n");   //  ans 中的长度与n不相等，就说明无拓扑序列

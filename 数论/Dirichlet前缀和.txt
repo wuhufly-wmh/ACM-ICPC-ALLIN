@@ -1,0 +1,55 @@
+//类似与sosdp
+#include<bits/stdc++.h>
+#define ll long long 
+using namespace std;
+const int N = 2e7 + 5;
+int prime[N] = {0}, cnt = 0, vis[N];
+void init() {
+	for (int i = 2; i <= N - 5; i += 1) {
+		if(!vis[i]) {
+			prime[++cnt] = i;
+		}
+		for (int j = 1; j <= cnt && prime[j] * i <= N - 5; j += 1) {
+			vis[i * prime[j]] = 1;
+			if(i % prime[j] == 0) {
+				break;
+			}
+		}
+	}
+	return ;
+}
+#define uint unsigned int
+uint seed;
+inline uint getnext(){
+	seed^=seed<<13;
+	seed^=seed>>17;
+	seed^=seed<<5;
+	return seed;
+}
+uint a[N] = {0};
+void Solve() {
+	int n;
+	cin >> n >> seed;
+	for (int i = 1; i <= n; i += 1) {
+		a[i] = getnext();
+	}
+	for (int i = 1; i <= cnt; i += 1) {
+		for (int j = 1; (ll)j * prime[i] <= (ll)n; j += 1) {
+			a[j * prime[i]] += a[j];
+		}		
+	}
+	ll ans = 0;
+	for (int i = 1; i <= n; i += 1) {
+		ans ^= a[i];
+	}
+	cout << ans << "\n";
+	return ;
+}
+signed main() {
+	int T = 1;
+	init();
+	while(T--) {
+		Solve();
+	}
+	return 0;
+}

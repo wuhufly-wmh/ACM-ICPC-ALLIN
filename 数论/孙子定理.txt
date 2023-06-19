@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define int long long
+using namespace std;
+
+const int N = 1e5 + 10;
+/*
+x = b1 (mod a1)
+x = b2 (mod a2)
+......
+x = bn (mod an)
+*/
+
+int exgcd(int a, int b, int &x, int &y){
+	if(b == 0){
+		x = 1;
+		y = 0;
+		return a;
+	}
+	int r = exgcd(b, a % b, x, y);
+	tie(x, y) = make_tuple(y, x - (a / b) * y);
+	return r;
+}
+
+int gcd(int a, int b) { return b == 0 ? a : gcd(b, a % b); }
+
+int lcm(int a, int b) { return a / gcd(a, b) * b; }
+
+int excrt(int k, int *a, int *r) {
+    int M = r[1], ans = a[1];
+    for (int i = 2; i <= k; i++) {
+        int x0, y0;
+        int c = a[i] - ans;
+        int g = exgcd(M, r[i], x0, y0);
+        if (c % g != 0) return -1;
+        x0 = (__int128)x0 * (c / g) % (r[i] / g);
+        ans = x0 * M + ans;
+        M = lcm(M, r[i]);
+        ans = (ans % M + M) % M;
+    }
+    return ans;
+}
+
+int n, a[N], b[N];
+signed main() {
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i] >> b[i];
+    int res = excrt(n, b, a);
+    cout << res << endl;
+
+    return 0;
+}

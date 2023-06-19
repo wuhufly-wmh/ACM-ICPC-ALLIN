@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+#define debug(x)    cout << #x << ": " << x << endl
+
+const int N = 1e6 + 5, inf = 0x3f3f3f3f;
+struct edge{
+    int to, next, val;
+}G[N << 2];
+int head[N] = {0};
+struct node{
+    int id, dis;
+    node(int id, int dis) : id(id), dis(dis){}
+    bool operator < (const node & x)const{
+        return dis > x.dis;
+    }
+};
+int dis[N] = {0};
+int vis[N] = {0};
+void solve(){
+    int u, v, cnt = 0;
+    int n, m, s, t, val;
+    memset(dis, inf, sizeof(dis));
+    cin >> n >> m >> s >> t;
+    auto add = [&](int u, int v, int val){
+        G[++cnt] = {v, head[u], val};
+        head[u] = cnt;
+    };
+    for(int i = 1; i <= m; ++i){
+        cin >> u >> v >> val;
+        add(u, v, val);
+        add(v, u, val);
+    }
+    priority_queue<node>que;
+    que.emplace(s, 0);
+    dis[s] = 0;
+    while(!que.empty()){
+        node x = que.top();
+        tie(u, val) = make_tuple(x.id, x.dis);
+        que.pop();
+        if(vis[u]) continue;
+        vis[u] = 1;
+        for(int i = head[u]; i; i = G[i].next){
+            int v = G[i].to;
+            if(vis[v])continue;
+            if(dis[v] > dis[u] + G[i].val){
+                dis[v] = dis[u] + G[i].val;
+                que.emplace(v, dis[v]);
+            }
+        }   
+    }
+    cout << (dis[t] == inf ? -1 : dis[t]) << endl; 
+    
+    return ;
+}
+signed main(){
+    cin.tie(0) -> sync_with_stdio(false);
+    cout.tie(0);
+    int _;
+    _ = 1;
+    while(_--){
+        solve();
+    }
+    return 0;
+}

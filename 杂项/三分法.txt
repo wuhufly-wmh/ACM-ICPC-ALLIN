@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 100;
+const double eps = 1e-6;
+int n; 
+double a[maxn+5];
+double F(double run)
+{
+	double sum=0;
+	for(int i=n;i>=0;i--)
+	{
+		sum+= a[i]*pow(run,i*1.0);
+	}
+	return sum;
+}
+int main()
+{
+	double l,r;
+	cin>>n;
+	cin>>l>>r;
+	for(int i=n;i>=0;i--)
+	{
+		cin>>a[i];
+	}
+	double mid1,mid2;
+	while(fabs(l-r)>=eps)
+	{
+		mid1 = (l+(r-l)/3);
+		mid2 = (r-(r-l)/3);
+		if(F(mid1)>=F(mid2))
+		{
+			r=mid2;
+		}
+		else{
+			l=mid1;
+		}
+	}
+	printf("%.5lf",(mid1+mid2)/2);
+	return 0;
+} 

@@ -1,0 +1,2 @@
+#pragma GCC optimize(2)
+#pragma G++ optimize(2)

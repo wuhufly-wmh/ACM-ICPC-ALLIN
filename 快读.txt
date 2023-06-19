@@ -1,0 +1,19 @@
+namespace IO {
+	char buf[(1 << 23) | 5], *p1 = buf, *p2 = buf, obuf[(1 << 23) | 5], *O = obuf;
+	char getc() { return p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, 1 << 23, stdin), p1 == p2) ? EOF : *p1 ++; }
+	inline void End() { fwrite(obuf, O - obuf, 1, stdout), O = obuf; }
+	inline void _(char ch) { *O++ = ch; if (O - obuf > (1 << 23)) End(); }
+	inline void __(std::string s) { int k = s.size(); for (int i = 0; i < k; ++ i) _(s[i]); }
+	void print(ll x) { if (x < 0) _('-'), x = -x; if (x > 9) print(x / 10); _(x % 10 ^ 48); }
+	inline int read() {
+		int res = 0; char ch = getc(); bool bo = false;
+		while (ch < '0' || ch > '9') bo = (ch == '-'), ch = getc();
+		while (ch >= '0' && ch <= '9') res = (res << 1) + (res << 3) + (ch ^ 48), ch = getc();
+		return bo ? -res : res;
+	}
+	template<typename T> void read(T &x) { x = read(); }
+	template<typename T, typename ...Argv> void read(T &x, Argv &...argv) { read(x); read(argv...); }
+}
+using IO::read;
+using IO::print;
+using IO::_;

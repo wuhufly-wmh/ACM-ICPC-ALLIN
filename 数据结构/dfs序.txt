@@ -1,0 +1,24 @@
+struct dfsxu {
+    int dfn[maxn];//新序列
+    int num[maxn];//新序列的节点
+    int sz[maxn];//节点大小
+    int vis[maxn];//判断是都
+    int cnt = 0;//用来求编号
+    void dfs1(int u)
+    {
+        dfn[++cnt] = u;//新节点编号
+        num[u] = cnt;//新节点编号对应的老节点编号
+        sz[u] = 1;
+        for (int k = G.head[u]; ~k; k = G.edge[k].next)
+        {
+            int temp = G.edge[k].to;
+            if (!vis[temp])
+            {
+                vis[temp] = 1;
+                dfs1(temp);
+                sz[u] += sz[temp];
+            }
+        }
+        return;
+    }
+}df;

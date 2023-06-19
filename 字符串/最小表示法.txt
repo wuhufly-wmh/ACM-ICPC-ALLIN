@@ -1,0 +1,54 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int inf=1e9+7;
+inline int read()
+{
+    int p=0,f=1;char c=getchar();
+    while(c<'0'||c>'9'){if(c=='-')f=-1;c=getchar();}
+    while(c>='0'&&c<='9'){p=p*10+c-'0';c=getchar();}
+    return f*p;}
+int n,ans,A[300009];
+int Min_show()
+//最小表示法求出串的最小表示
+{
+    int i=0,j=1,k=0;
+    //两个指针i,j,任意时刻i!=j,当前匹配长度为k
+    //循环同构串要复制一遍字串(成环)接在A序列后面
+    //由于数组过大,(i+k)%n和(j+k)%n代表了字串
+    //复制一遍接在原序列后各字符的对应位置
+    while(i<n&&j<n&&k<n)
+          {
+      	    if(A[(i+k)%n]==A[(j+k)%n])
+      	    //两个位置数值相等，匹配长度k++
+      	       k++;
+      	    else
+      	       {
+      	   	    if(A[(i+k)%n]>A[(j+k)%n])
+      	   	    //[i,i+k-1]与[j,j+k-1]相同
+                     //那么在[i,i+k-1]中不可能有最小表示
+			         //则i+=k+1,令k=0
+      	   	        i+=k+1;
+      	   	    else j+=k+1;
+      	   	    //同上
+      	   	    if(i==j)i++;
+                     //任何时候都要满足i!=j
+      	   	    k=0;//匹配长度k归零
+		       }
+	      }
+    return min(i,j);//返回最小表示
+}
+int main()
+{
+    n=read();
+    for(int i=0;i<n;i++)//初始字串
+        A[i]=read();
+    ans=Min_show();//求最小表示
+    for(int i=0;i<n;i++)//输出最小表示
+        printf("%d ",A[(i+ans)%n]);
+    return 0;
+}
+/*本题的最小表示法就是找出字符串S的的循环同构串中字典序最小的一个。
+那么什么是循环同构串呢？
+我们设S= “bcad” ，且设S’是S的循环同构的串。那么S’可以是 “bcad” 或者 “cadb” , “adbc” , “dbca”
+*/

@@ -1,0 +1,62 @@
+#include<bits/stdc++.h>
+#define sc scanf
+#define pr printf
+#define debug(x) cout << #x << ": " << x << endl;
+#define ll long long
+using namespace std;
+const int maxn = 1e5 + 5, inf = 0x3f3f3f3f;
+int tot = 0;
+int sq = 0;
+int laz[maxn + 5] = {0};
+int a[maxn + 5] = {0};//开着的灯
+int b_aq[maxn + 5] = {0};//关着的灯的块
+int r_lim[maxn + 5] = {0};//右边界
+void update(int l ,int r) {
+	for(int i = l; i <= min(r, r_lim[l] * sq); ++i){
+		b_aq[r_lim[i]] -= a[i] ^ laz[r_lim[i]];
+		a[i] ^= 1;
+		b_aq[r_lim[i]] += a[i] ^ laz[r_lim[i]];
+	}
+	if(r_lim[l] != r_lim[r]){
+		for(int i = (r_lim[r] - 1) * sq + 1; i <= r ; ++i){
+			b_aq[r_lim[i]] -= a[i] ^ laz[r_lim[i]];
+			a[i] ^= 1;
+			b_aq[r_lim[i]] += a[i] ^ laz[r_lim[i]];
+		}
+	}
+	for(int i = r_lim[l] + 1; i <= r_lim[r] - 1; ++i){
+		laz[i] ^= 1;
+		b_aq[i] = sq - b_aq[i];
+	}
+	return ;
+}
+int query(int l, int r) {
+	int ans = 0;
+	for(int i = l; i <= min(r, r_lim[l] * sq); ++i){
+		ans += a[i] ^ laz[r_lim[i]];
+	}
+	if(r_lim[l] != r_lim[r]){
+		for(int i = (r_lim[r] - 1) * sq + 1; i <= r ; ++i){
+			ans += a[i] ^ laz[r_lim[i]];
+		}
+	}
+	for(int i = r_lim[l] + 1; i <= r_lim[r] - 1; ++i){
+		ans += b_aq[i];
+	}
+	return ans;
+}
+signed main() {
+	int n, m;
+	cin >> n >> m;
+	sq = ceil(sqrt(n));
+	for(int i = 1; i <= n; ++i) {
+		r_lim[i] = (i - 1) / sq + 1;
+	}
+	while(m--) {
+		int op, l, r;
+		sc("%d %d %d", &op, &l, &r);
+		if(op == 0)	update(l, r);
+		else cout << query(l, r) << endl;
+	}
+	return 0;
+}

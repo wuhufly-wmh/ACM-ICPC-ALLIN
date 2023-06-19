@@ -1,0 +1,103 @@
+#include<bits/stdc++.h>//扫描线板子，
+#define pr printf
+#define sc sc scanf 
+#define ll long long
+#define pb push_back
+#define mk make_pair
+#define L(rt) (rt<<1)//左子树
+#define R(rt) (rt<<1|1)//右子树
+//#define Len(rt) (SegTree[rt].r-SegTree[rt].l+1)//区间长度,,以后直接在结构体里记录就好了
+#define Mid(rt) ((SegTree[rt].r+SegTree[rt].l)>>1)//区间中值
+const ll  INF = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1000005;
+const double eps = 1e-6;
+using namespace std;
+ll x[maxn << 1];
+struct ScanLine {
+	ll l, r, h;
+	int mark;
+	//  mark用于保存权值 (1 / -1),判断是在上还是在下
+	bool operator < (const ScanLine& rhs) const {
+		return h < rhs.h;//将线按照从高度进行排序
+	}
+} line[maxn<<1];//线段的排序
+struct Tree {
+	struct Seg {
+		int l, r;//左区间，右区间
+		ll sum, len;//总和，被覆盖的长度
+	}SegTree[maxn<<2];
+	
+	void push_up(int rt)
+	{
+		int l = SegTree[rt].l;
+		int r = SegTree[rt].r;
+		if (SegTree[rt].sum)//被覆盖过了
+		{
+			SegTree[rt].len = x[r + 1] - x[l];
+		}
+		else {
+			SegTree[rt].len = SegTree[L(rt)].len + SegTree[R(rt)].len;
+		}
+	}
+
+	void build(int rt,int l,int r)
+	{
+		SegTree[rt].l = l;
+		SegTree[rt].r = r;
+		SegTree[rt].len = SegTree[rt].sum = 0;
+		if (l == r)
+			return;
+		int mid = Mid(rt);
+		build(L(rt),l,mid);
+		build(R(rt), mid + 1, r);
+		return;
+	}
+	void edit_tree(int rt,int L,int R,int c)
+	{
+		int l = SegTree[rt].l;
+		int r = SegTree[rt].r;
+		if (x[r + 1] <= L || R <= x[l])
+			return;//如果不在这个区间里
+		if (L <= x[l] && x[r + 1] <= R)
+		{
+			SegTree[rt].sum += c;
+			push_up(rt);
+			return;
+		}
+		edit_tree(L(rt),L,R,c);
+		edit_tree(R(rt),L,R,c);
+		push_up(rt);
+		return;
+	}
+
+}tr;
+int main()
+{
+	iostream::sync_with_stdio(false);
+	int n,i,x1,y1,x2,y2;
+	cin >> n;
+	for (i = 1; i <= n; i++)
+	{
+		//sc("%d %d %d %d",x1,y1,x2,y2);
+		cin >> x1 >> y1 >> x2 >> y2;
+		x[2 * i - 1] = x1;
+		x[2 * i] = x2;
+		line[2 * i - 1] = ScanLine{ x1, x2, y1, 1 };//下边权为-1
+		line[2 * i] = ScanLine{ x1, x2, y2, -1 };//上边权为1
+		// 一条线段含两个端点，一个矩形的上下边都需要扫描线扫过
+	}
+	n <<=1;
+	sort(line+1,line+1+n);
+	sort(x+1,x+1+n);
+	int tot = unique(x + 1, x + 1 + n) - x - 1;//用于去重
+	tr.build(1,1,tot-1);
+	ll ans = 0;
+	
+		for(i=1;i<n;i++) /* 最后一条边是不用管的 */
+		{
+			tr.edit_tree(1,line[i].l,line[i].r,line[i].mark);
+			ans += tr.SegTree[1].len * (line[i + 1].h - line[i].h);
+		}
+		//pr("%lld",ans);
+		cout << ans;
+		return 0;
+}

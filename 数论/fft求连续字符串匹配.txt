@@ -1,0 +1,122 @@
+#include<bits/stdc++.h>
+#define Mid ((tr[u].l+tr[u].r)>>1)
+#define Len(u) (tr[u].r-tr[u].l+1)
+#define random(a,b) ((a)+rand()%((b)-(a)+1))
+#define db puts("---")
+using namespace std;
+
+//void rd_cre() { freopen("d://dp//data.txt","w",stdout); srand(time(NULL)); }
+//void rd_ac() { freopen("d://dp//data.txt","r",stdin); freopen("d://dp//AC.txt","w",stdout); }
+//void rd_wa() { freopen("d://dp//data.txt","r",stdin); freopen("d://dp//WA.txt","w",stdout); }
+
+typedef long long LL;
+typedef unsigned long long ULL;
+typedef pair<int,int> PII;
+
+const int N=1000010,mod=1e9+7,INF=0x3f3f3f3f;
+const double eps=1e-6,PI=acos(-1);
+
+int n,m;
+int rev[N];
+int bit,limit;
+int f[N],pre[N],ans[N];
+char s1[N],s2[N];
+double p1[N],p2[N];
+
+struct Complex {
+	double x,y;
+	Complex operator + (const Complex& t) const { return {x+t.x,y+t.y}; }
+	Complex operator - (const Complex& t) const { return {x-t.x,y-t.y}; }
+	Complex operator * (const Complex& t) const { return {x*t.x-y*t.y,x*t.y+y*t.x}; } 
+}a[N],b[N];
+
+void fft(Complex a[],int inv) {
+	for(int i=0;i<limit;i++) if(i<rev[i]) swap(a[i],a[rev[i]]);
+	for(int mid=1;mid<limit;mid<<=1) {
+		Complex w1=Complex({p1[mid],inv*p2[mid]});
+		for(int i=0;i<limit;i+=mid*2) {
+			Complex wk=Complex({1,0});
+			for(int j=0;j<mid;j++,wk=wk*w1) {
+				Complex x=a[i+j],y=wk*a[i+j+mid];
+				a[i+j]=x+y; a[i+j+mid]=x-y;
+			}
+		}
+	}
+}
+
+int main()
+{
+//	ios::sync_with_stdio(false);
+//	cin.tie(0);
+
+	int _; scanf("%d",&_);
+	while(_--) {
+		
+		int cnt=0;
+		scanf("%d%d%s%s",&n,&m,s1,s2);
+		pre[0]=0; ans[m]=0; ans[m+1]=0;
+		for(int i=0;i<n;i++) {
+			if(i>0) pre[i]=pre[i-1];
+			pre[i]+=s1[i]=='*';
+			if(i<m) cnt+=s2[i]=='*';
+			ans[i]=0; f[i]=0;
+		}
+		reverse(s2,s2+m);
+		
+		bit=0;
+		while((1<<bit)<=n) bit++;
+		limit=1<<bit;
+		for(int i=0;i<limit;i++) rev[i]=(rev[i>>1]>>1)|((i&1)<<(bit-1));
+		for(int mid=1;mid<limit;mid<<=1) p1[mid]=cos(PI/mid),p2[mid]=sin(PI/mid);
+		
+		for(int op=0;op<=10;op++) {
+			char now=op+'0';
+			if(op==10) now='*';
+			for(int i=0;i<limit;i++) a[i]=b[i]={0,0};
+			for(int i=0;i<n;i++) a[i]={s1[i]==now? 1.0:0,0};//将等于当前串的变成1 
+			for(int i=0;i<m;i++) b[i]={s2[i]==now? 1.0:0,0};//下面也一样 
+			fft(a,1); fft(b,1);
+			for(int i=0;i<limit;i++) a[i]=a[i]*b[i];
+			fft(a,-1);
+			for(int i=m-1;i<n;i++) {
+				int val=(int)(a[i].x/limit+0.5);//只有大于m-1的子串才有机会(卷积的定义) 
+				if(op<10) f[i]+=val;
+				else f[i]-=val;
+			}
+		}
+		/*cout<<"F[i]:";
+		for(int i=m-1;i<n;i++)
+		{
+			cout<<f[i]<<" ";
+		}*/
+//
+		for(int i=m-1;i<n;i++) {
+			int all=pre[i];
+			if(i>m-1) all-=pre[i-m];//nmd 
+			all+=cnt+f[i];
+			ans[m-all]++;
+		}
+		for(int i=1;i<=m;i++) ans[i]+=ans[i-1];
+		for(int i=0;i<=m;i++) printf("%d\n",ans[i]);
+	}
+/*
+1
+5 3
+*12*4
+1*3
+*/
+
+
+
+
+	return 0;
+}
+/*
+
+*/
+
+
+
+
+
+

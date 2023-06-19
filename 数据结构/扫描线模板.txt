@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+
+
+#define debug(x) cout << #x << ": " << x << endl
+using namespace std;
+#define int long long 
+const int N = 1e6 + 5, inf = 0x3f3f3f3f, mod = 998244353;
+typedef long long ll;
+
+
+
+int X[N] = {0};
+struct Line{
+  int l, r, mk, h;
+  bool operator < (const Line &x) {
+    return h < x.h;
+  }
+}L[N];
+struct SegTree{
+  struct node{
+    int l, r;
+    int mk, sum;
+  }Seg[N << 2];
+  void push(int rt) {
+    if(Seg[rt].mk) {
+      Seg[rt].sum = X[Seg[rt].r + 1] - X[Seg[rt].l];
+    } else {
+      Seg[rt].sum = Seg[rt << 1].sum + Seg[rt << 1 | 1].sum;
+    }
+    return ;
+  }
+  void build(int rt, int l, int r) {
+    tie(Seg[rt].l, Seg[rt].r) = make_tuple(l, r);
+    if(l == r) {
+      Seg[rt].mk = Seg[rt].sum = 0;
+      return ;
+    }
+    int mid = (l + r) >> 1;
+    build(rt << 1, l, mid);
+    build(rt << 1 | 1, mid + 1, r);
+    push(rt);
+  }
+  void update(int rt, int l, int r, int L, int R, int c) {
+    if(L <= l && r <= R) {
+      Seg[rt].mk += c;
+      push(rt);
+      return ;
+    }
+    int mid = (l + r) >> 1;
+    if(L <= mid) update(rt << 1, l, mid, L, R, c); 
+    if(R > mid) update(rt << 1 | 1, mid + 1, r, L, R, c);
+    push(rt);
+    return ; 
+  }
+}tr;
+void solve(){
+  int n, x1, y1, x2, y2;
+  int cnt = 0, cnt1 = 0;
+  cin >> n;
+  for(int i = 1; i <= n; ++i) {
+    cin >> x1 >> y1 >> x2 >> y2;
+    L[++cnt] = {x1, x2, 1, y1};
+    L[++cnt] = {x1, x2, -1, y2};
+    X[++cnt1] = x1;
+    X[++cnt1] = x2;
+  }
+  sort(L + 1, L + cnt + 1), sort(X + 1, X + 1 + cnt1);
+  cnt1 = unique(X + 1, X + 1 + cnt1) - X - 1;
+  L[0].h = L[1].h;
+  int ans = 0;
+  tr.build(1, 1, cnt1 - 1);
+  for(int i = 1; i <= cnt; ++i) {
+    int l, r;
+    l = lower_bound(X + 1, X + 1 + cnt1, L[i].l) - X;
+    r = lower_bound(X + 1, X + 1 + cnt1, L[i].r) - X;
+    r--;
+    ans += tr.Seg[1].sum * (L[i].h - L[i - 1].h);
+    tr.update(1, 1, cnt1 - 1, l, r, L[i].mk);
+  }
+  cout << ans << endl;
+  return ;
+}
+signed main(){
+    cin.tie(0) -> ios::sync_with_stdio(false);
+    cout.tie(0);
+    int _ = 1;
+    while(_--) {
+        solve();
+    }
+}

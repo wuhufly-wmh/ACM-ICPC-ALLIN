@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+
+
+#define debug(x) cout << #x << ": " << x << endl
+using namespace std;
+const int N = 3e6 + 5, inf = 0x3f3f3f3f, mod = 998244353;
+typedef long long ll;
+
+
+int a[N] = {0};
+int root[N] = {0};
+struct SegTree{
+    int tot = 0;
+    struct node{
+        int l, r, val;
+    }Seg[N << 3];
+    void build(int &rt, int l, int r) {
+        rt = ++tot;
+        if(l == r){
+            Seg[rt].val = a[l];
+            return ;
+        }
+        int mid = (l + r) >> 1;
+        build(Seg[rt].l, l, mid);
+        build(Seg[rt].r, mid + 1, r);
+        return ;
+    }//idx 为标准值， c为修改值
+    void change(int pre, int &rt, int l, int r, int idx, int c) {
+        rt = ++tot;
+        Seg[rt] = Seg[pre];
+        if(l == r) {
+            Seg[rt].val = c;
+            return ;
+        }
+        int mid = (l + r) >> 1;
+        if(mid >= idx) {
+            change(Seg[pre].l, Seg[rt].l, l, mid, idx, c);
+        } else {
+            change(Seg[pre].r, Seg[rt].r, mid + 1, r, idx, c);
+        }
+        return ;
+    }
+    int query(int rt, int l, int r, int f) {
+        if(l == r) return Seg[rt].val;
+        int mid = (l + r) >> 1; 
+        if(mid >= f) {
+            return query(Seg[rt].l, l, mid, f);
+        } else {
+            return query(Seg[rt].r, mid + 1, r, f);
+        }
+    }
+}tr;
+void solve(){
+    int n, m, v, op, idx, c;
+    cin >> n >> m;
+    for(int i = 1; i <= n; ++i) {
+        cin >> a[i];
+    }
+    tr.build(root[0], 1, n);
+    for(int i = 1; i <= m; ++i) {
+        cin >> v >> op >> idx;
+        if(op == 1) {
+            cin >> c;
+            tr.change(root[v], root[i], 1, n, idx, c);
+        } else {
+            cout << tr.query(root[v], 1, n, idx) << "\n";
+            root[i] = root[v];
+        }
+    }
+    return;
+}
+signed main(){
+    cin.tie(0) -> ios::sync_with_stdio(false);
+    cout.tie(0);
+    int _ = 1;
+    while(_--) {
+        solve();
+    }
+}

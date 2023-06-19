@@ -1,0 +1,56 @@
+const int N = 4e4 + 10, M = 2e7, INF = 0x3f3f3f3f;
+int h[N], ne[M], e[M], f[M], idx;
+int cur[N], d[N], q[N];
+bool st[N << 1];
+int n, S, T;
+
+void add(int a, int b, int c) {
+  e[idx] = b, ne[idx] = h[a], f[idx] = c, h[a] = idx++;
+  e[idx] = a, ne[idx] = h[b], f[idx] = 0, h[b] = idx++;
+}
+
+bool bfs() {
+  int hh = 0, tt = -1;
+  memset(d, 0x3f, sizeof d);
+  q[++tt] = S, d[S] = 1, cur[S] = h[S];
+  while (hh <= tt) {
+    int t = q[hh++];
+    for (int i = h[t]; ~i; i = ne[i]) {
+      int j = e[i];
+      if (d[j] == INF && f[i]) {
+        d[j] = d[t] + 1;
+        cur[j] = h[j];
+        if (j == T)
+          return 1;
+        q[++tt] = j;
+      }
+    }
+  }
+  return 0;
+}
+
+int find(int u, int limit) {
+  if (u == T)
+    return limit;
+  int flow = 0;
+  for (int i = cur[u]; ~i && flow < limit; i = ne[i]) {
+    int j = e[i];
+    cur[u] = i;
+    if (d[j] == d[u] + 1 && f[i]) {
+      int t = find(j, min(limit - flow, f[i]));
+      if (!t)
+        d[j] = -1;
+      f[i] -= t, f[i ^ 1] += t, flow += t;
+    }
+  }
+  return flow;
+}
+
+int dinic() {
+  int r = 0, flow;
+  while (bfs())
+    if (flow = find(S, INF)) {
+      r += flow;
+    }
+  return r;
+}

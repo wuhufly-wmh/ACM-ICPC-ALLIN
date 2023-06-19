@@ -1,0 +1,216 @@
+#include<bits/stdc++.h>
+#define debug(x) cout << #x << ": " << x << "\n";
+using namespace std;
+
+
+
+using ll = long long;
+constexpr ll N = 4e5 + 100, inf = 0x3f3f3f3f;
+vector<int> G[N];
+struct node {
+  int dfn, dep = 0, fa, son = 0, sz = 0, top = 0;
+  int nfd = 0 ;
+} tr[N + 5];
+void dfs1(int u, int fa) {//dep, sz, son, fa, 
+  tr[u].sz = 1, tr[u].fa = fa, tr[u].dep = tr[fa].dep + 1;
+  for(auto v : G[u]) {
+    if(v == fa) continue;
+    dfs1(v, u);
+    tr[u].sz += tr[v].sz;
+    if(tr[u].son == 0 || tr[tr[u].son].sz < tr[v].sz) {
+      tr[u].son = v;
+    }
+  }
+  return;
+}
+int cnt1 = 0;
+void dfs2(int u, int fa) {
+  tr[u].top = fa;
+  tr[u].dfn = ++cnt1;
+  tr[cnt1].nfd = u;
+  if (tr[u].son == 0) return;
+  dfs2(tr[u].son, fa);
+  for(auto v : G[u]) {
+    if(tr[u].fa == v || v == tr[u].son) continue;
+    dfs2(v, v);
+  }
+  return;
+}
+int LCA(int x, int y) {
+  while(tr[x].top != tr[y].top) {
+    if(tr[tr[x].top].dep < tr[tr[y].top].dep) {
+      swap(x, y);
+    }
+    x = tr[tr[x].top].fa;
+  }
+  return tr[x].dep < tr[y].dep ? x : y;
+}
+int b[N] = {0};
+struct SegTree {
+  int n;
+  struct node {
+    int l, r;
+    ll sum, tag;
+    node(){};
+    node(int l, int r, ll sum, ll tag) : l(l), r(r), sum(sum), tag(tag){}; 
+  }Seg[N << 2];
+  void push(int rt) {
+    Seg[rt].sum = Seg[rt << 1].sum + Seg[rt << 1 | 1].sum;  
+    return ;
+  }
+  #define len(x) (Seg[x].r - Seg[x].l + 1)
+  void push_down(int rt) {
+    if(Seg[rt].tag != 0) {
+      ll lz = Seg[rt].tag;
+      Seg[rt].tag = 0;
+      Seg[rt << 1].sum += 1ll * len(rt << 1) * lz;
+        Seg[rt << 1].tag += lz;
+      Seg[rt << 1 | 1].sum += 1ll * len(rt << 1 | 1) * lz;
+        Seg[rt << 1 | 1].tag += lz;
+    }
+    return ;
+  }
+  void init(int cnt) {
+    n = cnt;
+    function<void(int, int, int)>build = [&](int rt, int l, int r) {
+      Seg[rt] = {l, r, 0, 0};
+      if(l == r) {
+        Seg[rt] = {l, r, b[l], 0};
+        return ;
+      }
+      int mid = (l + r) >> 1;
+        build(rt << 1, l, mid);
+        build(rt << 1 | 1, mid + 1, r);
+      push(rt); 
+      return ;
+    };
+    build(1, 1, n);
+  }
+  void update(int L, int R, int c) {
+    function<void(int, int, int, int, int, int)> change = [&](int rt, int l, int r, int L, int R, int c) -> void{
+      if (l > r || r < L || l > R) {
+          return;
+      }
+      if(L <= l && r <= R) {
+        Seg[rt].tag += c;
+        Seg[rt].sum += 1ll * len(rt) * c;
+        return ;
+      }
+      push_down(rt);
+      int mid = (l + r) >> 1;
+      if(mid >= L) {
+        change(rt << 1, l, mid, L, R, c);
+      }
+      if(mid < R) {
+        change(rt << 1 | 1, mid + 1, r, L, R, c);
+      }
+      push(rt);
+      return;
+    };
+    change(1, 1, n, L, R, c);
+    return ;
+  }
+  ll query(int L, int R) {
+    function<ll(int, int, int, int, int)> ask = [&](int rt, int l, int r, int L, int R) -> ll{
+      if (l > r || r < L || l > R) {
+        return 0;
+      }
+      if(L <= l && r <= R) {
+        return Seg[rt].sum;
+      }
+      push_down(rt);
+      int mid = (l + r) >> 1;
+      ll ans = 0;
+      if(mid >= L) {
+        ans += ask(rt << 1, l, mid, L, R);
+      }
+      if(mid < R) {
+        ans += ask(rt << 1 | 1, mid + 1, r, L, R);
+      }
+      push(rt);
+      return ans;
+    };
+    return ask(1, 1, n, L, R);
+  }
+  ll get_sum(int x, int y)  {
+    ll ans = 0;
+    while(tr[x].top != tr[y].top) {
+      if(tr[tr[x].top].dep < tr[tr[y].top].dep) {
+        swap(x, y);
+      }
+      ans += query(tr[tr[x].top].dfn, tr[x].dfn);
+      x = tr[tr[x].top].fa;
+    }
+    if(tr[x].dep > tr[y].dep) {
+      swap(x, y);
+    }
+    ans += query(tr[x].dfn, tr[y].dfn);
+    return ans;
+  }
+  void update_sum(int x, int y, int z)  {
+    while(tr[x].top != tr[y].top) {
+      if(tr[tr[x].top].dep < tr[tr[y].top].dep) {
+        swap(x, y);
+      }
+      update(tr[tr[x].top].dfn, tr[x].dfn, z);
+      x = tr[tr[x].top].fa;
+    }
+    if(tr[x].dep > tr[y].dep) {
+      swap(x, y);
+    }
+    update(tr[x].dfn, tr[y].dfn, z);
+    return ;
+  }
+  ll get_son(int x) {
+    ll ans = query(tr[x].dfn, tr[x].dfn + tr[x].sz - 1);
+    return ans;
+  }
+  void update_son(int x, int c) {
+    update(tr[x].dfn, tr[x].dfn + tr[x].sz - 1, c);
+  }
+}Segt;
+
+int a[N] = {0};
+void solve() {
+  int n, m, r, u, v;
+  cin >> n >> m >> r;
+  for(int i = 1; i <= n; ++i) cin >> a[i];
+  for(int i = 1; i <= n - 1; ++i) {
+    cin >> u >> v;
+    G[u].emplace_back(v);
+    G[v].emplace_back(u);
+  }
+  dfs1(r, r), dfs2(r, r);
+  for(int i = 1; i <= n; ++i) b[tr[i].dfn] = a[i];
+  Segt.init(n);
+  int opt, x, y, z;
+  while(m--) {
+    cin >> opt;
+    if(opt == 1) {
+      cin >> x >> y >> z;
+      Segt.update_sum(x, y, z);
+    } 
+    if(opt == 2) {
+      cin >> x >> y;
+      cout << Segt.get_sum(x, y) << "\n";
+    }
+    if(opt == 3) {
+      cin >> x >> z;
+      Segt.update_son(x, z);
+    }
+    if(opt == 4) {
+      cin >> x;
+      cout << Segt.get_son(x) << "\n";
+    }
+  }
+  return ;
+}
+signed main () {
+  cin.tie(nullptr) -> sync_with_stdio(false);
+  cout.tie(nullptr);
+  int _ = 1;
+  while(_--) {
+    solve();
+  }
+  return 0;
+}

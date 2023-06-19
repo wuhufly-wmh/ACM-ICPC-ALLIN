@@ -1,0 +1,86 @@
+#include<bits/stdc++.h>//匹配最多有多少个连续子串能够完全匹配
+#define MAXN 2000005
+#define reg register
+#define inl inline
+#define db double
+#define eps 1e-6
+using namespace std;
+const int Mod=998244353;
+const db Pi=acos(-1.0);
+struct Complex
+{
+	db x,y;
+	friend Complex operator + (const Complex &a,const Complex &b)
+	{
+		return ((Complex){a.x+b.x,a.y+b.y});
+	}
+	friend Complex operator - (const Complex &a,const Complex &b)
+	{
+		return ((Complex){a.x-b.x,a.y-b.y});
+	}
+	friend Complex operator * (const Complex &a,const Complex &b)
+	{
+		return ((Complex){a.x*b.x-a.y*b.y,a.x*b.y+a.y*b.x});
+	}
+	friend Complex operator * (const Complex &a,const db &val)
+	{
+		return ((Complex){a.x*val,a.y*val});
+	}
+}f[MAXN],g[MAXN],p[MAXN];
+int n,m,lim=1,maxn,rev[MAXN],a[MAXN],b[MAXN];
+char S[MAXN],T[MAXN];
+bool used[MAXN];
+vector <int> v;
+inl void FFT(reg Complex *A,reg int opt)
+{
+	for(reg int i=0;i<lim;i++) if(i<rev[i]) swap(A[i],A[rev[i]]);
+	for(reg int mid=1;mid<lim;mid<<=1)
+	{
+		reg Complex Wn=((Complex){cos(Pi/(db)mid),(db)opt*sin(Pi/(db)mid)});
+		for(reg int j=0;j<lim;j+=(mid<<1))
+		{
+			reg Complex W=((Complex){1,0});
+			for(reg int k=0;k<mid;k++,W=W*Wn)
+			{
+				reg Complex x=A[j+k],y=W*A[j+k+mid];
+				A[j+k]=x+y;
+				A[j+k+mid]=x-y;
+			}
+		}
+	}
+}
+int main()
+{
+	scanf("%d %d",&m,&n);
+	scanf("%s",T+1);
+	scanf("%s",S+1);
+	for(reg int i=1;i<=m;i++) if(T[i]!='*') a[i-1]=T[i]-'a'+1;//如果为*则为0 
+	for(reg int i=1;i<=n;i++) if(S[i]!='*') b[i-1]=S[i]-'a'+1;//如果为*则为0,就不会影响那个吊公式了 
+	while(lim<=(n+m))//跑三遍fft 
+	{
+		lim<<=1;
+		maxn++;
+	}
+	for(reg int i=0;i<lim;i++) rev[i]=((rev[i>>1]>>1)|((i&1)<<maxn-1));
+	reverse(a,a+m);
+	for(reg int i=0;i<m;i++) f[i]=((Complex){a[i]*a[i]*a[i],0});
+	for(reg int i=0;i<n;i++) g[i]=((Complex){b[i],0});
+	FFT(f,1);FFT(g,1);
+	for(reg int i=0;i<lim;i++) p[i]=p[i]+f[i]*g[i]; //这个为公式所需的p[i] 
+	for(reg int i=0;i<lim;i++) f[i]=g[i]=((Complex){0,0});//这应该是初始化一下吧， 
+	for(reg int i=0;i<m;i++) f[i]=((Complex){a[i]*a[i],0});
+	for(reg int i=0;i<n;i++) g[i]=((Complex){b[i]*b[i],0});
+	FFT(f,1);FFT(g,1);
+	for(reg int i=0;i<lim;i++) p[i]=p[i]-f[i]*g[i]*2.0;
+	for(reg int i=0;i<lim;i++) f[i]=g[i]=((Complex){0,0});
+	for(reg int i=0;i<m;i++) f[i]=((Complex){a[i],0});
+	for(reg int i=0;i<n;i++) g[i]=((Complex){b[i]*b[i]*b[i],0});
+	FFT(f,1);FFT(g,1);
+	for(reg int i=0;i<lim;i++) p[i]=p[i]+f[i]*g[i];
+	FFT(p,-1);
+	for(reg int i=m-1;i<n;i++) if(!(int)(p[i].x/(db)lim+0.5)) v.push_back(i-m+2);//从m-1开始 
+	reg int Ans=v.size();
+	printf("%d\n",Ans);
+	for(reg int i=0;i<Ans;i++) printf("%d ",v[i]);
+	return 0;
+}

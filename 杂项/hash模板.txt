@@ -1,0 +1,78 @@
+using ull = unsigned long long ;
+struct Hash {
+  ull base = 131;
+  ull p[N]; char s[N];
+  ull mp[N], mp1[N];
+  int len;
+  void init(string &str) {
+    len = str.length();
+    for (int i = 1; i <= len; ++ i) s[i] = str[i - 1];
+    p[0] = 1;
+    for (int i = 1; i <= len; ++ i) {
+      mp[i] = mp[i - 1] * base + s[i];
+      p[i] = p[i - 1] * base;
+    }
+    // inv
+    for (int i = len; i >= 1; -- i) {
+      mp1[i] = mp1[i + 1] * base + s[i];
+    }
+  }
+  ull hash (int l, int r) {
+    return mp[r] - mp[l - 1] * p[r - l + 1];
+  }
+  ull hash1 (int l, int r) {
+    return mp1[l] - mp1[r + 1] * p[r - l + 1];
+  }
+  bool ch_mid(int l, int r) {
+    int len = r - l + 1;
+    if(len == 1) return true;
+    int mid = (l + r) >> 1;
+    if(len & 1) {
+      return hash(l, mid - 1) == hash1(mid + 1, r);
+    } else {
+      return hash(l, mid) == hash1(mid + 1, r);
+    }
+  }
+};
+struct Hash1 {
+  const int mod1 = 998244353, mod2 = 1e9+9;
+  int base = 23333, n;
+  vector<int> hsh1, hsh2, invhsh1, invhsh2, pw1, pw2;
+  void init(string s) {
+    n = s.size(); 
+    hsh1.resize(n), hsh2.resize(n), pw1.resize(n), pw2.resize(n);
+    for(int i = 0; i < n; i++){
+      if(i == 0) hsh1[i] = hsh2[i] = s[i], pw1[0] = 1, pw2[0] = 1;
+      else{
+        pw1[i] = 1ll * pw1[i - 1] * base % mod1;
+        pw2[i] = 1ll * pw2[i - 1] * base % mod2;
+        hsh1[i] = (1ll * hsh1[i-1] * base + s[i]) % mod1;
+        hsh2[i] = (1ll * hsh2[i-1] * base + s[i]) % mod2;
+      }
+    }
+  }
+  void invinit(string s) {
+    n = s.size(); 
+    invhsh1.resize(n), invhsh2.resize(n);
+    for(int i = n - 1; i >= 0; i--) {
+      if(i == n - 1) invhsh1[i] = invhsh2[i] = s[i];
+      else{
+        invhsh1[i] = (1ll * base * invhsh1[i + 1] + s[i]) % mod1;
+        invhsh2[i] = (1ll * base * invhsh2[i + 1] + s[i]) % mod2;
+      }
+    }
+  }
+    
+  pair<int, int> gt(int l, int r){
+    pair<int, int> res;
+    if(l <= r) {
+      res.first = (hsh1[r] - 1ll * (l == 0 ? 0 : hsh1[l - 1]) * pw1[r - l + 1] % mod1 + mod1) % mod1;
+      res.second = (hsh2[r] - 1ll * (l == 0 ? 0 : hsh2[l - 1]) * pw2[r - l + 1] % mod2 + mod2) % mod2;
+    }
+    else{
+      res.first = (invhsh1[r] - 1ll * (l == n - 1 ? 0 : invhsh1[l + 1]) * pw1[l - r + 1] % mod1 + mod1) % mod1;
+      res.second = (invhsh2[r] - 1ll * (l == n - 1 ? 0 : invhsh2[l + 1]) * pw2[l - r + 1] % mod2 + mod2) % mod2;
+    }
+    return res;
+  }
+};

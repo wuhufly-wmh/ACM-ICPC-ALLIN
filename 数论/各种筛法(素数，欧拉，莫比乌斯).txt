@@ -1,0 +1,26 @@
+bool vis[N + 5];
+int mo[N + 5], prime[N + 5], phi[N + 5], cnt1 = 0; 
+void init() {
+  phi[1] = 1, mo[1] = 1;
+  memset(vis, true, sizeof(vis));
+  vis[1] = vis[0] = false;
+  for(int i = 2; i <= N - 5; ++i) {
+    if (vis[i] == true){
+      mo[i] = -1;
+      prime[++cnt1] = i;
+      phi[i] = i - 1; 
+    }
+    for (int j = 1; j <= cnt1 && prime[j] * i <= N - 5; ++j) {
+      vis[prime[j] * i] = false;
+      if (i % prime[j] == 0){
+        phi[i * prime[j]] = phi[i] * prime[j];
+        mo[i * prime[j]] = 0;
+        break;
+      }
+      else {
+        mo[i * prime[j]] = -mo[i];
+        phi[i * prime[j]] = phi[i] * (prime[j] - 1);
+      }
+    }
+  } 
+}

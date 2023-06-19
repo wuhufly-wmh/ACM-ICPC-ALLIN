@@ -1,0 +1,146 @@
+#include<bits/stdc++.h>//课处理重复串
+//#pragma GCC optimize(2)
+//#pragma GCC optimize("inline")
+#define pr printf
+#define sc scanf
+#define endl '\n'
+#define ll long long 
+#define rep(i,l,r) for(int i=l;i<=r;++i)
+#define per(i,r,l) for(int i=r;i>=l;--i)
+#define ms(x,y) memset(x,y,sizeof(x))
+#define local_in freopen("input.in", "r", stdin)
+#define local_out freopen("output.out", "w", stdout)
+const int inf = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1e6 + 5;
+const double eps = 1e-6;
+using namespace std;
+int sum[maxn];//用于统计最大值
+struct tire {
+	int mp[maxn];//用于记录这个字符出现的最后一个数，用于处理重复串
+	int fail[maxn];//失败时的回溯指针
+	int cnt = 0;//节点个数
+	struct no {
+		int son[27];
+		int id = 0;//节点编号
+		int ans = 0;//记录单词出现的次数
+	}node[maxn];
+	void clean(int x)
+	{
+		memset(node[x].son, 0, sizeof(node[x].son));
+		fail[x] = 0;
+		node[x].id = 0;
+		node[x].ans = 0;
+		return;
+	}
+	void insert(string a, int id)//插入
+	{
+		int len = a.length();
+		int p = 0;
+		rep(i, 0, len - 1)
+		{
+			if (node[p].son[a[i] - 'a'] == 0)
+			{
+				node[p].son[a[i] - 'a'] = ++cnt;
+				clean(node[p].son[a[i] - 'a']);
+			}
+			p = node[p].son[a[i] - 'a'];
+		}
+		node[p].ans++;//当前节点单词数+1
+		if (node[p].id == 0)
+		{
+			node[p].id = id;
+		}
+		mp[id] = node[p].id;
+		return;
+	}
+	//fail[now]  ->当前节点now的失败指针指向的地方
+	//node[now].son[i]  ->下一个字母为i+'a'的节点的下标为node[now].son[i]
+	void getfail()
+	{
+		queue<int>que;
+		rep(i, 0, 25)//先将第二层出现的所有字母丢进队列
+		{
+			if (node[0].son[i])
+			{
+				fail[node[0].son[i]] = 0;
+				que.push(node[0].son[i]);
+			}
+		}
+		while (!que.empty())
+		{
+			int now = que.front();
+			que.pop();
+			rep(i, 0, 25)
+			{
+				if (node[now].son[i])//如果有这个子节点
+				{
+					//让我等于父节点指向的fail的为a+'i'的节点,使后缀等于前缀，然后实现O(n)判断
+					fail[node[now].son[i]] = node[fail[now]].son[i];
+					que.push(node[now].son[i]);
+				}
+				else
+					//否则就让当前节点的这个子节点
+				//指向当前节点fail指针的这个子节点
+					node[now].son[i] = node[fail[now]].son[i];
+			}
+		}
+	}
+	int querysum(string a)//查询有多少模式串能够匹配
+	{
+		int len = a.length();
+		int now = 0;
+		int answ = 0;
+		rep(i, 0, len - 1)
+		{
+			now = node[now].son[a[i] - 'a'];
+			for (int j = now; j && node[j].ans != -1; j = fail[j])
+			{
+				answ += node[j].ans;
+				node[j].ans = -1;
+			}
+		}
+		return answ;
+	}
+	void  querymax(string a)//查询出现次数最多的子串,先初始化当前串有多少个数，再来寻找
+	{
+		int len = a.length();
+		int now = 0;
+		rep(i, 0, len - 1)
+		{
+			now = node[now].son[a[i] - 'a'];
+			for (int j = now; j; j = fail[j])
+			{
+				sum[node[j].id]++;
+			}
+		}
+		return;
+	}
+}tr;
+//需要的时候进行修改
+string ap[maxn];
+string adc;
+int main()
+{
+	iostream::sync_with_stdio(false); cin.tie(0);
+	int n;
+		cin>>n;
+		tr.cnt = 0;
+		tr.clean(0);
+		rep(i, 1, n)
+		{
+			cin >> ap[i];
+			sum[i] = 0;
+			tr.insert(ap[i], i);
+		}
+		tr.fail[0] = 0;
+		tr.getfail();
+		cin >> adc;
+		tr.querymax(adc);
+		//int maxd = 0;
+		rep(i, 1, n)
+		{
+			//cout<<tr.mp[i]<<endl;
+			cout << sum[tr.mp[i]] << endl;
+		}
+	
+	return 0;
+}

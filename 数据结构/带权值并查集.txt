@@ -1,0 +1,18 @@
+int FindSet(int x) {//查找+路径压缩+权值累加
+    if (x == parent[x])
+		return x;
+    else {
+		int t = parent[x]; //记录原父节点编号
+		parent[x] = FindSet(parent[x]); //父节点变为根节点，此时value[x]=父节点到根节点的权值
+		value[x] += value[t]; //当前节点的权值加上原本父节点的权值
+         return parent[x]
+    }
+}
+//并查集合并+权值相加.
+	int xRoot = FindSet(x);
+	int yRoot = FindSet(y);
+	if (xRoot != yRoot)
+	{
+		parent[xRoot] = yRoot;
+		value[xRoot] = -value[x] + value[y] + s;
+	}

@@ -1,0 +1,80 @@
+//unbengable??//本人御用模板
+#include<bits/stdc++.h>
+//#pragma GCC optimize(2)
+//#pragma GCC optimize("inline")
+#define pr printf
+#define sc scanf
+#define endl '\n'
+#define ll long long 
+#define ull unsigned long long 
+#define rep(i,l,r) for(int i=l;i<=r;++i)
+#define per(i,r,l) for(int i=r;i>=l;--i)
+#define ms(x,y) memset(x,y,sizeof(x))
+#define local_in freopen("in.txt", "r", stdin)
+#define local_out freopen("out.txt", "w", stdout)
+#define IOS iostream::sync_with_stdio(false);cin.tie(0)
+#define debug(x) cout<<"#x:"<<" "<<x<<endl 
+const int inf = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1e6 + 5;
+const double eps = 1e-6;
+using namespace std;
+ll p;
+ll qpow(ll n, ll m)
+{
+    ll ans = 1;
+    while (m)
+    {
+        if (m & 1)
+            ans *= n;
+        n = n * n;
+        m >>= 1;
+        n %= p;
+        ans %= p;
+    }
+    return ans;
+}
+ll inv[maxn+5] = {0};
+void init()
+{
+    inv[0] = 1;
+    rep(i,1,maxn)
+    {
+        inv[i]=inv[i - 1] * i;
+        inv[i] %= p;
+    }
+    return;
+}
+ll C(ll n,ll m)
+{
+    if (m > n)
+    {
+        return 0;
+    }
+    return inv[n] * qpow(inv[m]*inv[n-m]%p,p-2)%p;
+}
+ll Cc(ll n, ll m) {
+    if (n < m)      return 0;
+    if (m > n - m)     m = n - m;
+    ll  a = 1, b = 1;
+    for (int i = 0; i < m; i++) {
+        a = (a * (n - i)) % p;
+        b = (b * (i + 1)) % p;
+    }
+    return a * qpow(b, p - 2) % p;
+}
+ll Lucas(ll n, ll m) {
+    if (m == 0)  return 1;
+    return Lucas(n / p, m / p) * Cc(n % p, m % p) % p;
+}
+int main()
+{
+    IOS;
+    ll n, m;
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        cin >> n >> m >> p;
+        cout << Lucas(n,n+m)<<endl;
+    }
+    return 0;
+}

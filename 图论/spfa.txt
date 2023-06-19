@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+
+
+using namespace std;
+#define debug(x) cout << #x << ": " << x << endl;
+const int N = 2e5 + 5, inf = 0x3f3f3f3f, mod = 1e9 + 7, M = 1e3;
+using namespace std;
+struct edge{
+	int to, next, w;
+}G[N << 2];
+int head[N << 2] = {0};
+int cnt = 0;
+int dis[N << 2] = {0};
+int vis[N << 2] = {0};
+int in[N << 2] = {0};	
+void spfa(int s, int n){
+	deque<int>que;
+	que.push_back(s);
+	vis[s] = 1;
+	dis[s] = 0;
+	while(!que.empty()){
+		int u = que.front();
+		vis[u] = 0;
+		que.pop_front();
+		for(int i = head[u]; ~i; i = G[i].next){
+			int v = G[i].to;
+			int w = G[i].w;
+			if(dis[v] > dis[u] + w){
+				dis[v] = dis[u] + w;
+				if(++in[v] >= n){
+					//代表有负环
+				}
+				if(!vis[v]){
+					vis[v] = 1;
+					if(que.size() && dis[que.front()] > dis[v]){
+						que.push_front(v);
+					}else{
+						que.push_back(v);
+					}
+				}
+			}
+		}
+	}
+	return ;
+}
+void solve(){
+	int u, v, w;
+	auto add = [&](int u, int v, int w){
+		G[++cnt] = {v, head[u], w};
+		head[u] = cnt;
+		return ;
+	};
+	int t, r, p, s;
+	cin >> t >> r >> p >> s;
+	for(int i = 1; i <= t; ++i){
+		head[i] = -1;
+		dis[i] = inf;
+	}
+	for(int i = 1; i <= r; ++i){
+		cin >> u >> v >> w;
+		add(u, v, w);
+		add(v, u, w);
+	}
+	for(int i = 1; i <= p; ++i){
+		cin >> u >> v >> w;
+		add(u, v, w);
+	}
+	spfa(s, t);
+	for(int i = 1; i <= t; ++i){
+		if(dis[i] == inf){
+			cout << "NO PATH" << endl;
+		}else{
+			cout << dis[i] << endl;
+		}
+	}
+	return ;
+}
+//Bi -> Ai
+
+signed main(){
+	cin.tie(0) -> sync_with_stdio(false);
+	cout.tie(0);
+	cout << fixed << setprecision(1);
+	int _;
+	_ = 1;
+	while(_--){
+		solve();
+	}
+	return 0;
+}

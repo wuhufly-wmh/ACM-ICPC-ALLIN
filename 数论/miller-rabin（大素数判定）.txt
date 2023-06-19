@@ -1,0 +1,81 @@
+using u128 = long long;
+namespace Factorizer {
+  constexpr bool miller_rabin(long long n) {
+    if (n <= 1 || (n != 2 && n % 2 == 0)) return false;
+    for (auto a : {3, 5, 7, 11, 13, 17, 19, 23, 29}) {
+      if (n % a == 0) return n == a;
+    }
+    if (n < 31 * 31) return true;
+    long long d = n - 1;
+    while (d % 2 == 0) d /= 2;
+    constexpr long long bases[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022};
+    for (long long a : bases) {
+      if (n == a) return true;
+      long long t = d;
+      long long y = 1 % n;
+      for (long long _t = t; _t != 0; _t >>= 1) {
+        if (_t & 1) y = (u128) y * a % n;
+        a = (u128) a * a % n;
+      }
+      while (t != n - 1 && y != 1 && y != n - 1) {
+        y = (u128) y * y % n;
+        t <<= 1;
+      }
+      if (y != n - 1 && t % 2 == 0) return false;
+    }
+    return true;
+  }
+  vector<int> primes;
+  vector<int> least;
+  void euler_sieve(int n) {
+    primes = vector<int>();
+    least.assign(n + 1, 0);
+    for (int i = 2; i <= n; ++i) {
+      if (least[i] == 0) {
+        least[i] = i;
+        primes.push_back(i);
+      }
+      int now = 0;
+      while (now < (int) primes.size()
+        && primes[now] <= least[i] && i * primes[now] <= n) {
+        least[i * primes[now]] = primes[now];
+        now += 1;
+      }
+    }
+  }
+  long long pollard_rho(long long n) {
+    if (miller_rabin(n)) return n;
+    long long now = 0;
+    do {
+      long long t = gcd(++now, n), r = t;
+      if (t != 1 && t != n) return t;
+      long long g = 1;
+      do {
+        t = ((u128) t * t % n + now) % n;
+        r = ((u128) r * r % n + now) % n;
+        r = ((u128) r * r % n + now) % n;
+      } while ((g = gcd(abs(t - r), n)) == 1);
+      if (g != n) return g;
+    } while (now < n / now);
+    return 0;
+  }
+  template <typename T>
+  vector<T> factor(T n) {
+    vector<T> g, d;
+    d.push_back(n);
+    while (!d.empty()) {
+      auto v = d.back();
+      d.pop_back();
+      auto rho = pollard_rho(v);
+      if (rho == v) {
+        g.push_back(rho);
+      } else {
+        d.push_back(rho);
+        d.push_back(v / rho);
+      }
+    }
+    sort(g.begin(), g.end());
+    return g;
+  }
+}
+using namespace Factorizer;

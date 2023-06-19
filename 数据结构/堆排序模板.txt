@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>//堆排序模板
+#define pr printf
+#define sc scanf
+#define inf 999999999
+#define maxn 10000005
+#define mod 1000000007
+#define re register
+#pragma GCC optimize(2)
+#pragma GCC optimize("inline")
+using namespace std;
+inline int read()
+{
+	re int x=0,f=1;
+	re char c=getchar();
+	while(c<'0'||c>'9') {if(c=='-') f=-1;c=getchar();}
+	while (c>='0'&&c<='9') x=(x<<3)+(x<<1)+(c^48),c=getchar();
+	return x*f;
+}
+void write(int x) {
+     if(x<0) putchar('-'),x=-x;
+     if(x>9) write(x/10);
+     putchar(x%10+'0');
+}
+int adc[maxn],cnt;
+void down(int a)//小顶堆 
+{
+	int t=a;
+	if(a*2<=cnt&&adc[2*a]<adc[t])
+	t=2*a;
+	if(a*2+1<=cnt&&adc[2*a+1]<adc[t])
+	t=2*a+1;
+	if(t!=a)
+	{
+		swap(adc[a],adc[t]);
+		down(t);
+	}
+	return ;
+}
+int main()
+{
+	iostream::sync_with_stdio(false);
+	int n,i,j,k,m;
+	n=read();
+	m=read();
+	cnt=n;
+		for(i=1;i<=n;i++) 
+		{
+			adc[i]=read();
+		}
+		for(i=n/2;i;i--)
+		{
+			down(i);
+		}
+		for(i=1;i<=m;i++)
+		{
+			cout<<adc[1]<<" ";
+			adc[1]=adc[cnt--];
+			down(1);
+		 } 
+			
+}

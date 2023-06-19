@@ -1,0 +1,83 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 6e5 + 5;
+const int maxm = 1e5 + 4;
+char tmp[8];
+int n , ans[maxm] , last[maxm] , flag[maxm] , pos[maxm];
+char s[maxm];
+namespace AC{
+    int tr[maxn][27] , tot;
+    int fail[maxn] , cnt[2][maxn] , dep[maxn];
+    void init ()
+    {
+        tot = 0;
+        for (int i = 0 ; i < maxn ; i++){
+            for (int j = 0 ; j < 26 ; j++) tr[i][j] = 0;
+            fail[i] = cnt[0][i] = cnt[1][i] = dep[i] = 0;
+        }
+    }
+    int add (char * s){
+        int u = 0;
+        for (int i = 1 ; s[i] ; i++){
+            if (!tr[u][s[i] - 'a']) tr[u][s[i] - 'a'] = ++tot;
+            u = tr[u][s[i] - 'a'];
+            dep[u] = i;
+        }
+        return u;
+    }
+    queue<int>q;
+    void build (){
+        while (q.size()) q.pop();
+        for (int i = 0 ; i < 26 ; i++) if (tr[0][i]) q.push(tr[0][i]);
+        while (q.size()){
+            int u = q.front();q.pop();
+            for (int i = 0 ; i < 26 ; i++){
+                if (tr[u][i]){
+                    fail[tr[u][i]] = tr[fail[u]][i];
+                    q.push(tr[u][i]);
+                }else {
+                    tr[u][i] = tr[fail[u]][i];
+                }
+            }
+        }
+    }
+    void ask (char *t){
+        int u = 0;
+        memset(last , -1 , sizeof last);
+        for (int i = 1 ; t[i] ; i++){
+            u = tr[u][t[i] - 'a']; // 转移
+            for (int j = u ; j ; j = fail[j]){
+                cnt[0][j]++;
+                // 不可重叠
+                if (last[j] == -1 || i - last[j] >= dep[j]){
+                    cnt[1][j]++;
+                    last[j] = i;
+                }
+            }
+        }
+        return ;
+    }
+}
+int main()
+{
+    int t = 0;
+    int f;
+    cin>>f;
+    while (f--){
+        scanf("%s" , s + 1);
+		int m; scanf("%d" , &m);
+        memset(ans , 0 , sizeof ans);
+        AC::init();
+        for (int i = 1 ; i <= m ; i++){
+            int g=1;//如果相交就g=1,不然就g=0 
+            scanf("%s" , tmp + 1);
+            flag[i] = g;
+            pos[i] = AC::add(tmp);
+        }
+        AC::build();
+        AC::ask(s);
+       // printf("Case %d\n" , ++t);
+        for (int i = 1 ; i <= m ; i++) printf("%d\n" , AC::cnt[flag[i]][pos[i]]);
+    }
+    return 0;
+}

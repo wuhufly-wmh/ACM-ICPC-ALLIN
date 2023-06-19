@@ -1,0 +1,91 @@
+//unbengable??//
+#include<bits/stdc++.h>
+//#pragma GCC optimize(2)
+//#pragma GCC optimize("inline")
+#define pr printf
+#define sc scanf
+#define endl '\n'
+#define ll long long 
+#define ull unsigned long long 
+#define rep(i,l,r) for(int i=l;i<=r;++i)
+#define per(i,r,l) for(int i=r;i>=l;--i)
+#define ms(x,y) memset(x,y,sizeof(x))
+#define local_in freopen("in.txt", "r", stdin)
+#define local_out freopen("out.txt", "w", stdout)
+#define IOS iostream::sync_with_stdio(false);cin.tie(0)
+#define debug(x) cout<<"#x:"<<" "<<x<<endl 
+const int inf = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1e3 + 5;
+const double eps = 1e-6;
+using namespace std;
+inline ll read() {
+    ll x = 0; char c = getchar(); bool f = 0;
+    while (!isdigit(c)) { if (c == '-')f = 1; c = getchar(); }
+    while (isdigit(c)) { x = (x << 1) + (x << 3) + (c ^ 48); c = getchar(); }
+    return f ? -x : x;
+}
+inline void write(ll x) {
+    if (x < 0) putchar('-'), x = -x;
+    if (x > 9) write(x / 10);
+    putchar(x % 10 + '0');
+}
+bool vis[maxn + 5];//是质数
+int cnt = 0;
+ll prime[maxn + 5];
+void init()
+{
+    ms(vis, true);
+    rep(i, 2, maxn)
+    {
+        if (vis[i] == true)
+        {
+            prime[cnt++] = i;
+        }
+        for (int j = 0; j < cnt && prime[j] * i <= maxn; ++j)
+        {
+            vis[prime[j] * i] = false;
+            if (i % prime[j] == 0)
+            {
+                break;
+            }
+        }
+    }
+}
+const int delta[] = { -1, 1 };
+ll k;
+ll solve(ll x)
+{
+    ll ans = 0;
+    for (int i = 1; i < (1 << k); ++i)
+    {
+        int res = 1, cnt = 0;
+        for (int j = 0; j < k; ++j)
+        {
+            if (i & (1 << j))
+            {
+                res *= prime[j];
+                cnt++;
+            }
+        }
+        ans += delta[cnt & 1] * x / res;
+    }
+    //cout << x - ans << endl;
+    write(x-ans);
+    pr("\n");
+	return x - ans;
+}
+int main()
+{
+    int t;
+    ll n;
+    init();
+    cin >> t;
+    while (t--)
+    {
+        ll ans = 0;
+        //sc("%lld %lld",&n,&k);
+        n=read();
+        k=read();
+		solve(n);
+    }
+    return 0;
+}

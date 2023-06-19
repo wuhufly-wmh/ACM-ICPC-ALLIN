@@ -1,0 +1,26 @@
+#include<bits/stdc++.h>
+#define maxn 1000005
+using namespace std;
+int cnt=0,head[maxn];//head为 这个点所存下的第一个边 
+struct edge{
+	int to,dis,next;
+}edge[maxn+5];
+void Add_edge(int from ,int to,int w)
+{
+	edge[++cnt].to=to;
+	edge[cnt].dis=w;
+	edge[cnt].next=head[from];
+	head[from]=cnt;
+}
+int main()
+{
+	memset(head,-1,sizeof(head));
+	int i,j,k;
+	for(i=1;i<=n;i++)
+	{
+		for(k=head[i];~k;k=edge[k].next)//~k按位取反为-1就完事 
+		{
+			//edge[k].to就是跟这条边所连的点 
+		}
+	}
+}

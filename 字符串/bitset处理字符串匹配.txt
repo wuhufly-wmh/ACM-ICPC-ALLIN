@@ -1,0 +1,47 @@
+ #include <iostream>
+#include<bitset>
+#include<cstdio>
+using namespace std;
+const int maxn=5*1e6+5;
+bitset<1005>b[11];//两者必须一样大 ,更匹配的子串大小一样 
+bitset<1005>ans;//两者必须一样大 
+char s[maxn];
+int main()
+{
+    int n;
+    while(~scanf("%d",&n))
+    {
+        for(int i=0;i<10;i++)
+        b[i].reset();                   //将b[i]中所有二进制位置0
+        for(int i=0;i<n;i++)
+        {
+            int num;
+            scanf("%d",&num);
+            for(int j=0;j<num;j++)
+            {
+                int tmp;
+                scanf("%d",&tmp);
+                b[tmp].set(i);                     //把b[tmp]的i位二进制置为1
+            }
+        }
+       // getchar();
+        scanf(" %s",s);
+        ans.reset();
+        for(int i=0;s[i]!='\0';i++)
+        {
+            ans=ans<<1;//同样的跟乘2是等价的 
+            ans.set(0);//将最低为置为1 
+            //cout<<i<<" "<<ans<<" "<<b[s[i]-'0']<<endl;
+            ans=ans&b[s[i]-'0'];//当异或出来的最高位为1时，说明现在有多少个字符可以跟主串匹配 
+			if(ans[n-1]==1)                            //注意这种输出方式
+            {
+                char c=s[i+1];
+                s[i+1]='\0';
+                puts(s+i-n+1);
+                s[i+1]=c;
+            }
+        }
+        
+    }
+    return 0;
+}

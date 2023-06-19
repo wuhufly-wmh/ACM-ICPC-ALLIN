@@ -1,0 +1,26 @@
+struct Undo_Dsu
+{
+    stack <pair<int, int> > st ;
+    int fa[N] , siz[N] ;
+    void init(){
+        while(!st.empty())  st.pop() ;
+        for (int i = 1 ; i <= n * 2 + 1; i ++)  fa[i] = i , siz[i] = 1 ;
+    }
+    int findroot(int x){
+        return x == fa[x] ? x : findroot(fa[x]) ;
+    }
+    bool merge(int u , int v){
+        int fax = findroot(u) , fay = findroot(v);
+        if(fax == fay)  return false ;
+        if (siz[fax] > siz[fay])  swap(fax, fay) , swap(u , v) ;
+        fa[fax] = fay , siz[fay] += siz[fax] ;
+        st.push({fax , fay}) ;
+        return true ;
+    }
+    void undo(){ //撤销一次最新的合并
+        pair<int, int> no = st.top();
+        fa[no.first] = no.first ;
+        siz[no.second] -= siz[no.first] ;
+        st.pop() ;
+    }
+} DSU ;

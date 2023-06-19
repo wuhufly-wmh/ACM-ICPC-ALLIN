@@ -1,0 +1,15 @@
+struct Matrix{
+    int a[2][2];
+    Matrix operator * (const Matrix & x) const{
+        Matrix ans;
+        for(int i = 0 ; i <= 1; ++i){
+            for(int j = 0; j <= 1; ++j){
+                ans.a[i][j] = 0;
+                for(int k = 0; k <= 1; ++k){
+                    (ans.a[i][j] += 1ll * a[i][k] * x.a[k][j] % mod) %= mod;
+                }
+            }
+        }
+        return ans;
+    }
+}b[2];

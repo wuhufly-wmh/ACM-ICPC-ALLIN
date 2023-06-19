@@ -1,0 +1,22 @@
+#include<bits/stdc++.h>
+#define sc scanf
+#define pr printf
+#define i64 long long 
+#define debug(x) cout << #x << ": " << x << endl
+const int maxn = 1e6 + 5, inf = 0x3f3f3f3f;
+using namespace std;
+int main(){
+	//function  包装成一个类，   后面为函数的lanmda表达式形式 
+	i64 P = 100;
+	function<i64(i64, i64)> get = [&](i64 R, i64 r) { //[0, R] [0, r]
+		if(r < 0 || R < 0)
+			return 0ll;
+		R++;
+		r = min(r, P - 1);
+		i64 ans = (R / P) * (r + 1);
+		ans += min(r + 1, R % P);
+		return ans;
+	};
+	cout << get(100, 10) << endl;
+	return 0;
+}

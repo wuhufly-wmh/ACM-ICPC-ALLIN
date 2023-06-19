@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>//unbengable//
+#define pr printf
+#define sc scanf
+#define endl '\n'
+#define ll long long 
+#define ull unsigned long long 
+#define rep(i,l,r) for(int i=l;i<=r;++i)
+#define per(i,r,l) for(int i=r;i>=l;--i)
+#define ms(x,y) memset(x,y,sizeof(x))
+#define local_in freopen("in.txt", "r", stdin)
+#define local_out freopen("out.txt", "w", stdout)
+#define IOS iostream::sync_with_stdio(false);cin.tie(0)
+#define debug(x) cout<<"#x:"<<" "<<x<<endl 
+const int inf = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1e6 + 5;
+const double eps = 1e-6;
+using namespace std;
+
+
+int a[maxn];
+
+struct node{
+    int l,r,t,id;
+}q[maxn];
+pair<int,int> c[maxn];
+int cntq,cntc;
+int be[maxn],sz;
+
+struct rule{
+    bool operator ()(const node & x,const node & y)const{
+        if(be[x.l]!=be[y.l])return x.l<y.l;
+        if(be[x.r]!=be[y.r])return x.r<y.r;
+        return x.t<y.t;
+    }
+};
+
+int cnt[1000010];
+int sum,ans[maxn];
+int l=0,r=0,t=0;
+
+void add(int x){
+    if(++cnt[a[x]]==1) sum++;
+}
+
+void sub(int x){
+    if(--cnt[a[x]]==0) sum--;
+}
+void upt(int x){
+    if(c[x].first>=l&&c[x].first<=r){
+        if(--cnt[a[c[x].first]]==0) sum--;
+        if(++cnt[c[x].second]==1) sum++;
+    }
+    swap(c[x].second,a[c[x].first]);
+}
+
+signed main(){
+    int n,m;
+    cin>>n>>m;
+    sz=pow(n,2.0/3.0);
+    for(int i=1;i<=n;i++){
+        cin>>a[i];
+        be[i]=i/sz+1;
+    }
+    for(int i=1;i<=m;i++){
+        char opt;
+        int x,y;
+        cin>>opt>>x>>y;
+        if(opt=='Q'){
+            q[++cntq].l=x;
+            q[cntq].r=y;
+            q[cntq].id=cntq;
+            q[cntq].t=cntc;
+        }
+        else{
+            c[++cntc].first=x;
+            c[cntc].second=y;
+        }
+    }
+    sort(q+1,q+cntq+1,rule());
+
+    for(int i=1;i<=cntq;i++){
+        while(r<q[i].r) add(++r);
+        while(l>q[i].l) add(--l);
+        while(r>q[i].r) sub(r--);
+        while(l<q[i].l) sub(l++);
+
+        while(t<q[i].t) upt(++t);
+        while(t>q[i].t) upt(t--);
+
+        ans[q[i].id]=sum;
+
+    }
+    for(int i=1;i<=cntq;i++) cout<<ans[i]<<endl;
+
+}
+

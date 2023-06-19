@@ -1,0 +1,166 @@
+#include<bits/stdc++.h>
+
+    
+using namespace std;
+#define debug(x) cout << #x << ": " << x << endl;
+const int N = 2e5 + 5, mod = 1e9 + 7, inf = 0x3f3f3f3f, eps = 1e-7;
+
+struct node{
+	int to, next;
+}G[N << 1];
+int head[N] = {0};
+int cnt = 0;
+int dep[N] = {0};
+int dp[N][25] = {0};
+int fa[N] = {0};
+int root[N] = {0};
+int ans[N] = {0};
+int tot = 0;
+struct Seg{
+	struct node{
+		int l, r, sum, ans; 
+	}a[N * 40];
+	void init(){
+		for(int i = 0; i <= (N * 40) - 2; ++i){
+			a[i].l = a[i].r = a[i].sum = a[i].ans = 0;
+		}
+		return ;
+	}
+	void push_up(int rt){
+		if(!a[rt].l){
+			a[rt].ans = a[a[rt].r].ans;
+			a[rt].sum = a[a[rt].r].sum;
+			return ;
+		}
+		if(!a[rt].r){
+			a[rt].ans = a[a[rt].l].ans;
+			a[rt].sum = a[a[rt].l].sum;
+			return ;
+		}
+
+		if(a[a[rt].l].sum >= a[a[rt].r].sum){
+			a[rt].sum = a[a[rt].l].sum;
+			a[rt].ans = a[a[rt].l].ans;
+		} else {
+			a[rt].sum = a[a[rt].r].sum;
+			a[rt].ans = a[a[rt].r].ans;
+		}
+		return ;
+	}
+	void update(int &x, int l, int r, int pos, int w){
+		if(!x) x = ++tot;
+		if(l == r){
+			a[x].sum += w;
+			a[x].ans = pos;
+			return ;
+		}
+		int mid = (l + r) >> 1;
+		if(mid >= pos){
+			update(a[x].l, l, mid, pos, w);
+		}else{
+			update(a[x].r, mid + 1, r, pos, w);
+		}
+		push_up(x);
+	}
+	int mege(int x, int y, int l, int r){
+		if(!x || !y) return x + y;
+		if(l == r){
+			a[x].sum += a[y].sum;
+			return x;
+		}
+		int mid = (l + r) >> 1;
+		a[x].l = mege(a[x].l, a[y].l, l, mid);
+		a[x].r = mege(a[x].r, a[y].r, mid + 1, r);
+		push_up(x);
+		return x;
+	}
+	void calc(int u, int fa){
+		for(int i = head[u]; ~i; i = G[i].next){
+			int v =  G[i].to;
+			if(v == fa)continue;
+			calc(v, u);
+			root[u] = mege(root[u], root[v], 1, 100000);
+		}
+		ans[u] = a[root[u]].ans;
+		if(a[root[u]].sum == 0)ans[u] = 0;
+		return ;
+	}
+}tr;
+void solve() {
+	tr.init();
+	int n, m, u, v;
+	cin >> n >> m;
+	for(int i = 1; i <= n; ++i) {
+		head[i] = -1;
+	}
+	auto add = [&](int u, int v){
+		G[++cnt] = {v, head[u]};
+		head[u] = cnt;
+		return ;
+	};
+	function<void(int, int)> dfs = [&](int u, int fa){
+		dp[u][0] = fa;
+		dep[u] = dep[fa] + 1;
+		for(int i = 1; i <= 20; ++i){
+			dp[u][i] = dp[dp[u][i - 1]][i - 1];
+		}
+		for(int i = head[u]; ~i; i = G[i].next){
+			int v = G[i].to;
+			if(v == fa)continue;
+			dfs(v, u);
+		}
+	};
+	function<int(int, int)>lca = [&](int x, int y){
+		if(dep[x] < dep[y]) swap(x, y);
+		int i = 0;
+		while((1 << (i)) <= dep[x])i++;
+		for(int j = i; j >= 0; j--){
+			if(dep[x] - (1 << j) >= dep[y]){
+				x = dp[x][j];
+			}
+		}
+		if(x == y)return x;
+		for(int j = i ; j >= 0; j--){
+			if(dp[x][j] != dp[y][j]) {
+				tie(x, y) = make_tuple(dp[x][j], dp[y][j]);
+			}
+		}
+		return dp[x][0];
+	};
+	for(int i = 1; i <= n - 1; ++i){
+		cin >> u >> v;
+		add(u, v);
+		add(v, u);
+	}
+	dfs(1, 0);
+	int w;
+	for(int i = 1; i <= m; ++i){
+		cin >> u >> v >> w;
+		int l = lca(u, v);
+		// cout << l << " " << u << " " << v << endl;
+		tr.update(root[u], 1, 100000, w, 1);
+		tr.update(root[v], 1, 100000, w, 1);
+		tr.update(root[l], 1, 100000, w, -1);
+		tr.update(root[dp[l][0]], 1, 100000, w, -1);
+	}
+	tr.calc(1, 0);
+	for(int i = 1; i <= n; ++i){
+		cout << ans[i] << "\n";
+	}
+	return ;
+
+}
+/*
+*/
+
+
+signed main(){
+	cin.tie(0) -> sync_with_stdio(false);
+	cout.tie(0);
+	int _;
+	_ = 1;
+	while(_--){
+		solve();
+	}
+	return 0;
+}

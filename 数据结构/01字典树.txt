@@ -1,0 +1,42 @@
+const int MAXN = 3200000, MAXBIT = 31;
+int nxt[MAXN][2] = {0}, cnt = 1;
+int num[MAXN] = {0};
+
+void init(){
+  nxt[0][0] = nxt[0][1] = 0;
+  cnt = 1;
+}
+void insert(int n) {
+  int cur = 0;
+  for (int i = MAXBIT; i >= 0; --i) {
+    int bit = ((n >> i) & 1);
+    if (!nxt[cur][bit]){
+      nxt[cnt][0] = nxt[cnt][1] = 0;
+      nxt[cur][bit] = cnt++;
+    }
+    cur = nxt[cur][bit];
+  }
+  num[cur] = n;
+}
+int find_max(int x) {
+  int cur = 0;
+  for (int i = MAXBIT; i >= 0; --i) {
+    int bit = ((x >> i) & 1);
+    if (nxt[cur][bit ^ 1])
+      cur = nxt[cur][bit ^ 1];
+    else
+      cur = nxt[cur][bit];
+  }
+  return x ^ num[cur];
+}
+int find_min(int x) {
+  int cur = 0;
+  for (int i = MAXBIT; i >= 0; --i) {
+    int bit = ((x >> i) & 1);
+    if (nxt[cur][bit])
+      cur = nxt[cur][bit];
+    else
+      cur = nxt[cur][bit ^ 1];
+  }
+  return x ^ num[cur];
+}

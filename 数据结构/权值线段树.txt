@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+
+
+#define debug(x) cout << #x << ": " << x << endl
+using namespace std;
+const int N = 1e6 + 5, inf = 0x3f3f3f3f, mod = 998244353;
+typedef long long ll;
+
+
+int a[N] = {0};
+int root[N << 3] = {0};
+struct node{
+    int l, r, sum;
+}Seg[N << 3];
+int tot = 0;
+void solve(){
+    int n, m, l, r, k;
+    cin >> n >> m;
+    vector<int>vec;
+    for(int i = 1; i <= n; ++i) {
+        cin >> a[i];
+        vec.emplace_back(a[i]);
+    }
+    function<void(int, int&, int, int, int)> up = [&](int x, int &y, int l, int r, int p) {
+        y = ++tot;
+        Seg[y] = Seg[x];
+        Seg[y].sum++;
+        if(l == r)return;
+        int mid = (l + r) >> 1;
+        if(mid >= p) up(Seg[x].l, Seg[y].l, l, mid, p);
+        else up(Seg[x].r, Seg[y].r, mid + 1, r, p);
+        return ;
+    };
+    function<int(int, int&, int, int, int)> query = [&](int x, int y, int l, int r, int p) {
+        if(l == r)return l;
+        int mid = (l + r) >> 1;
+        int k = Seg[Seg[y].l].sum - Seg[Seg[x].l].sum;
+        if(k < p) {
+            return query(Seg[x].r, Seg[y].r, mid + 1, r, p - k);
+        } else {
+            return query(Seg[x].l, Seg[y].l, l, mid, p);
+        }
+        return 0;
+    };
+    sort(vec.begin(), vec.end());
+    vec.erase(unique(vec.begin(), vec.end()), vec.end());
+    for(int i = 1; i <= n; ++i) {
+        a[i] = lower_bound(vec.begin(), vec.end(), a[i]) - vec.begin() + 1;
+    }
+    int sz = vec.size();
+    for(int i = 1; i <= n; ++i) {
+        up(root[i - 1], root[i], 1, sz, a[i]);
+    }
+    while(m--) {
+        cin >> l >> r >> k;
+        cout << vec[query(root[l - 1], root[r], 1, sz, k) - 1] << "\n";
+    }
+    return;
+}
+signed main(){
+    cin.tie(0) -> ios::sync_with_stdio(false);
+    cout.tie(0);
+    int _ = 1;
+    while(_--) {
+        solve();
+    }
+}

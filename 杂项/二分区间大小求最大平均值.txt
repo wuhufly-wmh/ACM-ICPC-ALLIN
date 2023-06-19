@@ -1,0 +1,51 @@
+#include <iostream>
+#include <limits.h>
+#include <math.h>
+#define ll long long
+
+#define debug(x) cout << #x << ": " << x << "\n"
+using namespace std;
+
+const int N = 1e6 + 5, inf = 0x3f3f3f3f;
+
+int a[N];
+double tmp[N];
+void Solve() {
+  int n, f;
+  cin >> n >> f;
+  for (int i = 1; i <= n; i += 1) {
+    cin >> a[i];
+  }
+  double l = -LONG_MAX, r = LONG_MAX;
+  while (fabs(l - r) > 1e-8) {
+    double mid = (l + r) / 2;
+    double MIN = LONG_MAX, MAX = -LONG_MAX;
+    for (int i = 1; i <= n; i += 1) {
+      tmp[i] = (double)a[i] - mid;
+      tmp[i] += tmp[i - 1];
+    }
+    for (int i = f; i <= n; i += 1) {
+      MIN = min(MIN, tmp[i - f]);
+      MAX = max(MAX, tmp[i] - MIN);
+    }
+    if (MAX >= 0) {
+      l = mid;
+    } else {
+      r = mid;
+    }
+  }
+  cout << (ll)(r * 1000) << "\n";
+  return;
+}
+signed main() {
+  cin.tie(0)->sync_with_stdio(false);
+  cout.tie(0);
+  int T = 1;
+  while (T--) {
+    Solve();
+  }
+  return 0;
+}
+/*
+
+*/

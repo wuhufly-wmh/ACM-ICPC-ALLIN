@@ -1,0 +1,59 @@
+#include<iostream>
+#include<cstring>
+using namespace std;
+int shuju[10000],fibo[100],sum;
+int sg(int p)
+{
+    int flag[1000]={0};
+    int i,t;
+    for(i=0;i<sum;i++)
+    {
+        t=p-fibo[i];
+        if(t<0)
+        {
+            break;
+        }
+        if(shuju[t]==-1)
+        {
+            shuju[t]=sg(t);
+        }
+        flag[shuju[t]]=1;
+    }
+    for(i=0;;i++)
+    {
+        if(flag[i]==0)
+        {
+            return i;
+        }
+    }
+}
+int main()
+{
+    int i,a,b,c,t;
+    fibo[0]=1;
+    fibo[1]=2;
+    memset(shuju,-1,sizeof(shuju));
+    for(sum=2;;sum++)
+    {
+        
+        fibo[sum]=fibo[sum-1]+fibo[sum-2];
+    if(fibo[sum]>1000)
+    {
+        break;
+    }
+    }
+    shuju[0]=0;
+    while(1)
+    {
+        scanf("%d %d %d",&a,&b,&c);
+        if(a==0&&b==0&&c==0)
+        break;
+        t=sg(a)^sg(b)^sg(c);    
+        if(t==0)
+        {
+            cout<<"Nacci"<<endl;
+        }
+        else{
+            cout<<"Fibo"<<endl;
+        }
+    
